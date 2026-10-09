@@ -19,6 +19,7 @@ export default function PesananDetailPage() {
   const [order, setOrder] = useState(null);
   const [err, setErr] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [now, setNow] = useState(Date.now());
 
   const load = () => api.get(`/orders/${id}`)
     .then((r) => setOrder(r.data))
@@ -82,11 +83,21 @@ export default function PesananDetailPage() {
     }
   };
 
+  // Hitung mundur masa berlaku QR
+  useEffect(() => {
+    if (!order?.qr_string || order.status_pesanan !== "MENUNGGU_BAYAR") return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [order?.qr_string, order?.status_pesanan]);
+
   if (err) return <div className="max-w-3xl mx-auto p-10 text-rose-600">{err}</div>;
   if (!order) return <div className="max-w-3xl mx-auto p-10 text-slate-500">Memuat...</div>;
 
   const canUpload = ["MENUNGGU_BAYAR", "MENUNGGU_VERIFIKASI"].includes(order.status_pesanan);
   const canCancel = ["MENUNGGU_BAYAR", "MENUNGGU_VERIFIKASI"].includes(order.status_pesanan);
+  const qrExpired = Boolean(order.qr_expires_at && new Date(order.qr_expires_at).getTime() <= now);
+  const sisaDetik = order.qr_expires_at ? Math.max(0, Math.floor((new Date(order.qr_expires_at).getTime() - now) / 1000)) : 0;
+  const sisaStr = `${String(Math.floor(sisaDetik / 60)).padStart(2, "0")}:${String(sisaDetik % 60).padStart(2, "0")}`;
 
   return (
     <div className="max-w-5xl mx-auto px-5 py-8 space-y-5" data-testid="pesanan-detail">
@@ -112,9 +123,24 @@ export default function PesananDetailPage() {
             Scan QR berikut dengan aplikasi e-wallet / mobile banking Anda. Nominal: <span className="font-mono-tabular font-bold">{formatRupiah(order.total)}</span>
           </p>
           <div className="flex flex-col items-center gap-3">
-            {order.qr_string ? (
-              <div className="bg-white p-4 rounded-xl border shadow-sm" data-testid="qris-qr">
-                <QRCodeCanvas value={order.qr_string} size={240} includeMargin />
+            {order.qr_string && !qrExpired ? (
+              <>
+                <div className="bg-white p-4 rounded-xl border shadow-sm" data-testid="qris-qr">
+                  <QRCodeCanvas value={order.qr_string} size={240} includeMargin />
+                </div>
+                <p className="text-sm text-indigo-800" data-testid="qris-countdown">Berlaku <span className="font-mono-tabular font-semibold">{sisaStr}</span></p>
+                <div className="flex items-center gap-2 text-sm text-indigo-700">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+                  </span>
+                  Menunggu pembayaran — status diperbarui otomatis
+                </div>
+              </>
+            ) : qrExpired ? (
+              <div className="text-center space-y-3" data-testid="qris-expired">
+                <p className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-md px-4 py-3">QR pembayaran telah kedaluwarsa. Perbarui untuk mendapatkan QR baru.</p>
+                <Button size="sm" variant="outline" onClick={buatQris} data-testid="btn-refresh-qris">Perbarui QR</Button>
               </div>
             ) : order.qris_error ? (
               <div className="text-center space-y-3" data-testid="qris-error">
@@ -125,15 +151,6 @@ export default function PesananDetailPage() {
               <div className="text-center space-y-3">
                 <p className="text-sm text-indigo-700" data-testid="qris-preparing">Menyiapkan QR pembayaran…</p>
                 <Button size="sm" variant="outline" onClick={buatQris} data-testid="btn-generate-qris">Buat QR Pembayaran</Button>
-              </div>
-            )}
-            {order.qr_string && (
-              <div className="flex items-center gap-2 text-sm text-indigo-700">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
-                </span>
-                Menunggu pembayaran — status diperbarui otomatis
               </div>
             )}
           </div>

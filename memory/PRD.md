@@ -95,6 +95,8 @@ Hasil testing iteration_5: Backend 21/21 pytest + UI 100% end-to-end PASS.
 - Endpoint `POST /api/orders/{id}/qris` untuk buat/ulang QR.
 - Frontend `PesananDetailPage`: render QR (qrcode.react) + status real-time + tombol coba lagi + pesan error.
 - **BATAS PENTING**: QRIS Kasera menolak nominal > Rp 10.000.000/transaksi (`amount_too_large`). HP di atas 10jt harus pakai Transfer Bank. Sudah ditangani dengan pesan jelas.
+- **Batas QRIS Pintar (checkout)**: opsi QRIS otomatis disembunyikan di CheckoutPage bila total > Rp 10.000.000 + catatan arahan Transfer Bank. Terverifikasi.
+- **Kedaluwarsa QRIS**: PesananDetailPage menampilkan hitung mundur masa berlaku QR; saat kedaluwarsa tampil tombol "Perbarui QR" (backend `POST /orders/{id}/qris` membuat QR baru jika kadaluwarsa).
 - Yang MASIH perlu dari user: `KASERA_WEBHOOK_SECRET` + daftarkan URL webhook `https://toko-hp-dev.preview.emergentagent.com/api/webhooks/kasera` di dashboard Kasera (agar verifikasi otomatis tanpa polling).
 
 ### Google Drive Storage 🟡 (kode siap, belum aktif)

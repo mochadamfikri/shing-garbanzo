@@ -237,7 +237,15 @@ async def buat_qris(order_id: str, user=Depends(require_roles(ROLE_PELANGGAN))):
     if doc.get("metode_pembayaran", {}).get("kode") != "qris_merchant":
         raise HTTPException(status_code=400, detail="Metode pembayaran bukan QRIS")
     if doc.get("kasera_id") and doc.get("qr_string"):
-        return OrderPublic(**_enrich_order(doc))
+        exp = doc.get("qr_expires_at")
+        masih_berlaku = True
+        if exp:
+            try:
+                masih_berlaku = datetime.fromisoformat(exp) > now_utc()
+            except Exception:
+                masih_berlaku = True
+        if masih_berlaku:
+            return OrderPublic(**_enrich_order(doc))
     if not kasera.is_configured():
         raise HTTPException(status_code=400, detail="QRIS belum dikonfigurasi")
     now_s = now_utc().isoformat()

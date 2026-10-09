@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { formatRupiah } from "@/lib/format";
 import { ArrowLeft, MapPin, Truck, Wallet } from "lucide-react";
 
+const QRIS_MAX = 10000000;
+
 export default function CheckoutPage() {
   const { user } = useAuth();
   const { cart, refresh } = useCart();
@@ -46,6 +48,15 @@ export default function CheckoutPage() {
   const pengirimanObj = settings?.pengiriman_aktif?.find((m) => m.kode === kirim);
   const biayaKirim = pengirimanObj?.default_biaya || 0;
   const total = (cart.subtotal || 0) + biayaKirim;
+  const qrisDisembunyikan = total > QRIS_MAX;
+  const metodeBayar = (settings?.pembayaran_aktif || []).filter((m) => !(m.kode === "qris_merchant" && qrisDisembunyikan));
+
+  useEffect(() => {
+    if (bayar === "qris_merchant" && qrisDisembunyikan) {
+      setBayar(metodeBayar[0]?.kode || "");
+    }
+    // eslint-disable-next-line
+  }, [qrisDisembunyikan, bayar]);
 
   const submit = async () => {
     setErr("");
@@ -137,7 +148,7 @@ export default function CheckoutPage() {
             <h2 className="font-heading font-semibold flex items-center gap-2 mb-3"><Wallet className="w-4 h-4 text-[#0052FF]" /> Metode Pembayaran</h2>
             <RadioGroup value={bayar} onValueChange={setBayar} data-testid="checkout-pay-group">
               <div className="space-y-2">
-                {(settings?.pembayaran_aktif || []).map((m) => (
+                {metodeBayar.map((m) => (
                   <label key={m.kode} className="flex items-start gap-3 p-3 border border-slate-200 rounded-md cursor-pointer hover:bg-slate-50" data-testid={`pay-${m.kode}`}>
                     <RadioGroupItem value={m.kode} id={`pay-${m.kode}`} className="mt-1" />
                     <div className="flex-1">
@@ -153,6 +164,11 @@ export default function CheckoutPage() {
                 ))}
               </div>
             </RadioGroup>
+            {qrisDisembunyikan && (
+              <p className="text-xs text-amber-700 mt-2" data-testid="qris-hidden-note">
+                QRIS tidak tersedia untuk pesanan di atas {formatRupiah(QRIS_MAX)}. Silakan gunakan Transfer Bank.
+              </p>
+            )}
           </Card>
 
           <Card className="p-5">
