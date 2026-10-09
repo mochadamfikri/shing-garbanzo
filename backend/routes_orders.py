@@ -380,6 +380,22 @@ async def tandai_notifikasi_dibaca(_user=Depends(require_roles(ROLE_OWNER, ROLE_
     return {"dibaca": r.modified_count}
 
 
+@router.get("/admin/pembayaran-qris")
+async def riwayat_pembayaran_qris(_user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))):
+    """Riwayat semua pembayaran QRIS yang masuk (terurut terbaru)."""
+    from server import db
+    cursor = db.orders.find({"qris_paid_at": {"$ne": None}}).sort("qris_paid_at", -1).limit(200)
+    docs = await cursor.to_list(200)
+    return [{
+        "id": d["id"],
+        "nomor_pesanan": d["nomor_pesanan"],
+        "total": d.get("total", 0),
+        "qris_paid_at": d.get("qris_paid_at"),
+        "status_pesanan": d.get("status_pesanan"),
+        "kasera_id": d.get("kasera_id"),
+    } for d in docs]
+
+
 @router.get("", response_model=List[OrderPublic])
 async def list_all_orders(
     status: Optional[str] = None,

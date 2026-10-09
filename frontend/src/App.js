@@ -30,6 +30,7 @@ import OrdersAdminPage from "@/pages/admin/OrdersAdminPage";
 import OrderAdminDetailPage from "@/pages/admin/OrderAdminDetailPage";
 import LaporanPage from "@/pages/admin/LaporanPage";
 import PengeluaranPage from "@/pages/admin/PengeluaranPage";
+import RiwayatPembayaranPage from "@/pages/admin/RiwayatPembayaranPage";
 
 const STAFF = ["owner", "admin", "staf"];
 const FINANCE = ["owner", "admin"];
@@ -88,6 +89,7 @@ export default function App() {
                 <Route path="inventaris/:id/edit" element={<InventoryFormPage mode="edit" />} />
                 <Route path="pesanan" element={<OrdersAdminPage />} />
                 <Route path="pesanan/:id" element={<OrderAdminDetailPage />} />
+                <Route path="pembayaran-qris" element={<RiwayatPembayaranPage />} />
                 <Route path="laporan" element={
                   <ProtectedRoute roles={FINANCE}><LaporanPage /></ProtectedRoute>
                 } />

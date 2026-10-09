@@ -102,3 +102,11 @@ Hasil testing iteration_5: Backend 21/21 pytest + UI 100% end-to-end PASS.
 ### Google Drive Storage 🟡 (kode siap, belum aktif)
 - `storage_adapter.py` menambah `GoogleDriveStorage` (Service Account → upload + share anyone reader → URL `drive.google.com/uc?export=view&id=`).
 - Aktif bila `STORAGE_BACKEND=gdrive`. Perlu dari user: file JSON Service Account (`GDRIVE_SERVICE_ACCOUNT_FILE`) + `GDRIVE_FOLDER_ID` (folder dishare ke email service account). Saat ini masih `local`.
+
+## Update lanjutan 09/OKTOBER/2026
+- **Webhook Kasera AKTIF**: `KASERA_WEBHOOK_SECRET` sudah diisi. Diuji end-to-end (localhost): tanda tangan valid → pesanan DIPROSES + notif admin; event duplikat ter-dedup; tanda tangan salah ditolak 400. (Catatan: uji via URL publik diblok Cloudflare error 1010 untuk user-agent non-browser — tidak memengaruhi Kasera asli.)
+- **Notifikasi admin**: lonceng + badge + panel di AdminLayout, polling 20 detik, toast saat pembayaran baru. Endpoint `GET/POST /api/orders/admin/notifikasi[/baca]`.
+- **Riwayat Pembayaran QRIS**: halaman admin `/admin/pembayaran-qris` + nav, endpoint `GET /api/orders/admin/pembayaran-qris` (semua order dengan `qris_paid_at`). Terverifikasi.
+- **Batas QRIS pintar** di checkout (>Rp10jt sembunyikan QRIS) + **hitung mundur & perbarui QR** di detail pesanan. Terverifikasi.
+- **Google Drive BELUM aktif**: file yang diunggah user adalah OAuth Client ID (`web.client_secret`), BUKAN Service Account (`private_key`). Perlu JSON Service Account yang benar.
+- **Pesanan uji bayar Rp 1.000** (ORD-20261009-AD4889, akun `ujibayar@tokohp.id`) sengaja dipertahankan untuk uji pembayaran nyata oleh user.

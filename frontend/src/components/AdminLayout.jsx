@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { formatRupiah } from "@/lib/format";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Smartphone, LogOut, Store, Menu, ShoppingCart, Settings, BarChart3, Receipt, Bell } from "lucide-react";
+import { LayoutDashboard, Smartphone, LogOut, Store, Menu, ShoppingCart, Settings, BarChart3, Receipt, Bell, QrCode } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth as useAuthHook } from "@/lib/auth";
@@ -13,6 +13,7 @@ const NAV_ALL = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, testId: "nav-dashboard" },
   { to: "/admin/inventaris", label: "Inventaris HP", icon: Smartphone, testId: "nav-inventaris" },
   { to: "/admin/pesanan", label: "Pesanan", icon: ShoppingCart, testId: "nav-pesanan" },
+  { to: "/admin/pembayaran-qris", label: "Pembayaran QRIS", icon: QrCode, testId: "nav-pembayaran-qris" },
   { to: "/admin/laporan", label: "Laporan", icon: BarChart3, testId: "nav-laporan", roles: ["owner", "admin"] },
   { to: "/admin/pengeluaran", label: "Pengeluaran", icon: Receipt, testId: "nav-pengeluaran", roles: ["owner", "admin"] },
   { to: "/admin/pengaturan", label: "Pengaturan", icon: Settings, testId: "nav-pengaturan", roles: ["owner", "admin"] },
@@ -104,6 +105,7 @@ export default function AdminLayout() {
                       ))}
                     </ul>
                   )}
+                  <Link to="/admin/pembayaran-qris" onClick={() => setPanelOpen(false)} className="block text-center text-xs text-[#0052FF] hover:underline px-4 py-2.5 border-t border-slate-100" data-testid="notif-lihat-semua">Lihat semua pembayaran QRIS</Link>
                 </div>
               )}
             </div>
