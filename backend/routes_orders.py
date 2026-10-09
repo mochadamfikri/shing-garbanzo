@@ -39,6 +39,8 @@ async def mark_order_paid(db, order: dict, oleh: str, catatan: str = "") -> None
         {"id": order["id"]},
         {"$set": {"status_pembayaran": "DITERIMA", "status_pesanan": "DIPROSES",
                   "status_pengiriman": "DIKEMAS", "catatan_admin": catatan or order.get("catatan_admin", ""),
+                  "admin_notif_qris": oleh.startswith("kasera"),
+                  "qris_paid_at": now_s if oleh.startswith("kasera") else order.get("qris_paid_at"),
                   "updated_at": now_s}},
     )
 
@@ -213,7 +215,8 @@ async def checkout(payload: CheckoutRequest, user=Depends(require_roles(ROLE_PEL
             )
             qr = (tx.get("payment") or {}).get("qr_string")
             upd = {"kasera_id": tx.get("id"), "qr_string": qr,
-                   "qr_expires_at": tx.get("expires_at"), "qris_error": None, "updated_at": now_s}
+                   "qr_expires_at": tx.get("expires_at"), "qris_error": None,
+                   "kasera_checkout_url": tx.get("checkout_url"), "updated_at": now_s}
             await db.orders.update_one({"id": order["id"]}, {"$set": upd})
             order.update(upd)
         except Exception as e:
@@ -254,7 +257,8 @@ async def buat_qris(order_id: str, user=Depends(require_roles(ROLE_PELANGGAN))):
                                       f"Pesanan {doc['nomor_pesanan']}", f"order-{doc['id']}")
         qr = (tx.get("payment") or {}).get("qr_string")
         upd = {"kasera_id": tx.get("id"), "qr_string": qr,
-               "qr_expires_at": tx.get("expires_at"), "qris_error": None, "updated_at": now_s}
+               "qr_expires_at": tx.get("expires_at"), "qris_error": None,
+               "kasera_checkout_url": tx.get("checkout_url"), "updated_at": now_s}
     except Exception as e:
         upd = {"qris_error": kasera.friendly_error(e), "updated_at": now_s}
         logger.exception("Gagal membuat QRIS untuk %s", doc["nomor_pesanan"])
@@ -354,6 +358,28 @@ async def batal_pesanan(order_id: str, user=Depends(require_roles(ROLE_PELANGGAN
 
 
 # ---------- ADMIN ----------
+@router.get("/admin/notifikasi")
+async def notifikasi_pembayaran(_user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))):
+    """Daftar pesanan yang baru lunas via QRIS dan belum ditandai dibaca admin."""
+    from server import db
+    cursor = db.orders.find({"admin_notif_qris": True}).sort("qris_paid_at", -1).limit(50)
+    docs = await cursor.to_list(50)
+    items = [{
+        "id": d["id"],
+        "nomor_pesanan": d["nomor_pesanan"],
+        "total": d.get("total", 0),
+        "qris_paid_at": d.get("qris_paid_at"),
+    } for d in docs]
+    return {"count": len(items), "items": items}
+
+
+@router.post("/admin/notifikasi/baca")
+async def tandai_notifikasi_dibaca(_user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))):
+    from server import db
+    r = await db.orders.update_many({"admin_notif_qris": True}, {"$set": {"admin_notif_qris": False}})
+    return {"dibaca": r.modified_count}
+
+
 @router.get("", response_model=List[OrderPublic])
 async def list_all_orders(
     status: Optional[str] = None,

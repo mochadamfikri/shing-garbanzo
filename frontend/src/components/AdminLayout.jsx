@@ -1,8 +1,11 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import { api } from "@/lib/api";
+import { formatRupiah } from "@/lib/format";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Smartphone, LogOut, Store, Menu, ShoppingCart, Settings, BarChart3, Receipt } from "lucide-react";
-import { useState } from "react";
+import { LayoutDashboard, Smartphone, LogOut, Store, Menu, ShoppingCart, Settings, BarChart3, Receipt, Bell } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth as useAuthHook } from "@/lib/auth";
 
@@ -19,6 +22,32 @@ export default function AdminLayout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
+  const [notif, setNotif] = useState({ count: 0, items: [] });
+  const [panelOpen, setPanelOpen] = useState(false);
+  const prevCount = useRef(null);
+
+  const loadNotif = useCallback(() => {
+    api.get("/orders/admin/notifikasi").then((r) => {
+      setNotif(r.data);
+      if (prevCount.current !== null && r.data.count > prevCount.current) {
+        toast.success(`${r.data.count - prevCount.current} pembayaran QRIS baru diterima`);
+      }
+      prevCount.current = r.data.count;
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    loadNotif();
+    const t = setInterval(loadNotif, 20000);
+    return () => clearInterval(t);
+  }, [loadNotif]);
+
+  const markRead = () => {
+    api.post("/orders/admin/notifikasi/baca").then(() => {
+      setNotif({ count: 0, items: [] });
+      prevCount.current = 0;
+    }).catch(() => {});
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -42,6 +71,42 @@ export default function AdminLayout() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
+            <div className="relative" data-testid="admin-notif">
+              <Button variant="ghost" size="icon" onClick={() => setPanelOpen((o) => !o)} data-testid="btn-notif" aria-label="Notifikasi">
+                <Bell className="w-5 h-5" />
+                {notif.count > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-[#FF5722] text-white text-[10px] rounded-full px-1.5 py-0.5 font-medium" data-testid="notif-badge">{notif.count}</span>
+                )}
+              </Button>
+              {panelOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-lg shadow-lg z-40 overflow-hidden" data-testid="notif-panel">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
+                    <span className="text-sm font-semibold">Pembayaran QRIS Baru</span>
+                    {notif.count > 0 && (
+                      <button className="text-xs text-[#0052FF] hover:underline" onClick={markRead} data-testid="btn-notif-read">Tandai dibaca</button>
+                    )}
+                  </div>
+                  {notif.items.length === 0 ? (
+                    <p className="px-4 py-6 text-sm text-slate-500 text-center" data-testid="notif-empty">Belum ada pembayaran baru</p>
+                  ) : (
+                    <ul className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                      {notif.items.map((o) => (
+                        <li key={o.id}>
+                          <button
+                            className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors"
+                            onClick={() => { setPanelOpen(false); markRead(); nav("/admin/pesanan"); }}
+                            data-testid={`notif-item-${o.id}`}
+                          >
+                            <p className="text-sm font-medium font-mono-tabular">{o.nomor_pesanan}</p>
+                            <p className="text-xs text-emerald-600">Lunas via QRIS · {formatRupiah(o.total)}</p>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
             <Link to="/" className="hidden md:inline-flex">
               <Button variant="outline" size="sm" data-testid="btn-view-store">
                 <Store className="w-4 h-4 mr-1.5" /> Lihat Toko
