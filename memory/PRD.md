@@ -79,3 +79,24 @@ Hasil testing iteration_5: Backend 21/21 pytest + UI 100% end-to-end PASS.
 - Semua perhitungan uang menggunakan `int`/`Decimal` di backend (hindari floating-point).
 - Snapshot transaksi akan diimplementasi di Fase 3 (saat ini belum ada tabel pesanan).
 - Model `UnitHP` adalah entity utama; nanti akan dipisah dari `CatalogListing` di Fase 2 jika beberapa unit perlu digrupkan.
+
+## Update 09/OKTOBER/2026 — Impor ke lingkungan baru + QRIS Kasera + Google Drive
+
+### Lingkungan & Konfigurasi
+- Proyek diimpor dari repo `mochadamfikri/project-web` ke `/app`. Arsitektur CRA+craco (React 19) + FastAPI + MongoDB dipertahankan.
+- Database pengembangan terpisah: `DB_NAME=toko_hp_dev`.
+- Secret di `/app/backend/.env`: `JWT_SECRET` (acak), `KASERA_API_KEY` (live), `KASERA_WEBHOOK_SECRET` (kosong, menunggu), `GDRIVE_*` (kosong, menunggu).
+
+### QRIS via Kasera Pay ✅ (aktif)
+- Modul `kasera.py` (create_qris, get_transaction, verify_signature HMAC-SHA256, friendly_error).
+- Checkout metode `qris_merchant` otomatis membuat transaksi QRIS Kasera & simpan `qr_string` di order.
+- Webhook `POST /api/webhooks/kasera` (verifikasi tanda tangan + dedup `webhook_events`) → otomatis tandai pesanan LUNAS (unit TERJUAL, status DIPROSES/DIKEMAS).
+- Fallback rekonsiliasi `GET /api/orders/{id}/sync-pembayaran` (polling 5 detik di frontend) — berfungsi walau webhook belum dikonfigurasi.
+- Endpoint `POST /api/orders/{id}/qris` untuk buat/ulang QR.
+- Frontend `PesananDetailPage`: render QR (qrcode.react) + status real-time + tombol coba lagi + pesan error.
+- **BATAS PENTING**: QRIS Kasera menolak nominal > Rp 10.000.000/transaksi (`amount_too_large`). HP di atas 10jt harus pakai Transfer Bank. Sudah ditangani dengan pesan jelas.
+- Yang MASIH perlu dari user: `KASERA_WEBHOOK_SECRET` + daftarkan URL webhook `https://toko-hp-dev.preview.emergentagent.com/api/webhooks/kasera` di dashboard Kasera (agar verifikasi otomatis tanpa polling).
+
+### Google Drive Storage 🟡 (kode siap, belum aktif)
+- `storage_adapter.py` menambah `GoogleDriveStorage` (Service Account → upload + share anyone reader → URL `drive.google.com/uc?export=view&id=`).
+- Aktif bila `STORAGE_BACKEND=gdrive`. Perlu dari user: file JSON Service Account (`GDRIVE_SERVICE_ACCOUNT_FILE`) + `GDRIVE_FOLDER_ID` (folder dishare ke email service account). Saat ini masih `local`.

@@ -28,15 +28,10 @@ DEFAULT_SETTINGS = SettingsAdmin(
             siap_integrasi=True,
         ),
         MetodePembayaranConfig(
-            kode="qris_merchant", nama="QRIS Merchant", aktif=False, prioritas=2,
-            deskripsi="Scan QRIS merchant toko.",
-            petunjuk="Scan QR code di bawah menggunakan aplikasi e-wallet/bank Anda, lalu upload bukti.",
-            qr_image_url="", siap_integrasi=False,
-        ),
-        MetodePembayaranConfig(
-            kode="kasera_pay", nama="Kasera Pay", aktif=False, prioritas=3,
-            deskripsi="Integrasi Kasera Pay (akan tersedia setelah kredensial production).",
-            siap_integrasi=False,
+            kode="qris_merchant", nama="QRIS (Kasera)", aktif=True, prioritas=2,
+            deskripsi="Bayar instan via QRIS. QR dibuat otomatis oleh Kasera Pay.",
+            petunjuk="Scan QR yang muncul di halaman pesanan menggunakan aplikasi e-wallet/mobile banking Anda. Pembayaran terverifikasi otomatis.",
+            qr_image_url="", siap_integrasi=True,
         ),
     ],
     pengiriman=[

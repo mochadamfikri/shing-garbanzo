@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { formatRupiah, formatTanggalID } from "@/lib/format";
 import { ArrowLeft, Upload, Package, MapPin, Truck } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import { OrderStatusBadge } from "@/pages/PesananPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -25,6 +26,22 @@ export default function PesananDetailPage() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
 
+  // Polling otomatis status QRIS saat menunggu bayar
+  useEffect(() => {
+    if (!order || order.status_pesanan !== "MENUNGGU_BAYAR" || order.metode_pembayaran?.kode !== "qris_merchant") return;
+    const t = setInterval(() => {
+      api.get(`/orders/${id}/sync-pembayaran`).then((r) => {
+        setOrder(r.data);
+        if (r.data.status_pesanan !== "MENUNGGU_BAYAR") {
+          clearInterval(t);
+          if (r.data.status_pembayaran === "DITERIMA") toast.success("Pembayaran diterima! Pesanan diproses.");
+        }
+      }).catch(() => {});
+    }, 5000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line
+  }, [order?.status_pesanan, order?.metode_pembayaran?.kode, id]);
+
   const onUploadBukti = async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -41,6 +58,16 @@ export default function PesananDetailPage() {
     } finally {
       setUploading(false);
       e.target.value = "";
+    }
+  };
+
+  const buatQris = async () => {
+    try {
+      const { data } = await api.post(`/orders/${id}/qris`);
+      setOrder(data);
+      if (!data.qr_string && data.qris_error) toast.error(data.qris_error);
+    } catch (e) {
+      toast.error(formatApiErrorDetail(e?.response?.data?.detail) || "Gagal membuat QR");
     }
   };
 
@@ -78,7 +105,42 @@ export default function PesananDetailPage() {
         {canCancel && <Button variant="outline" size="sm" onClick={batalkan} data-testid="btn-cancel-order">Batalkan Pesanan</Button>}
       </div>
 
-      {order.status_pesanan === "MENUNGGU_BAYAR" && (
+      {order.status_pesanan === "MENUNGGU_BAYAR" && order.metode_pembayaran.kode === "qris_merchant" && (
+        <Card className="p-5 border-indigo-200 bg-indigo-50" data-testid="qris-card">
+          <h2 className="font-heading font-semibold text-indigo-900 mb-1">Bayar dengan QRIS</h2>
+          <p className="text-sm text-indigo-800 mb-4">
+            Scan QR berikut dengan aplikasi e-wallet / mobile banking Anda. Nominal: <span className="font-mono-tabular font-bold">{formatRupiah(order.total)}</span>
+          </p>
+          <div className="flex flex-col items-center gap-3">
+            {order.qr_string ? (
+              <div className="bg-white p-4 rounded-xl border shadow-sm" data-testid="qris-qr">
+                <QRCodeCanvas value={order.qr_string} size={240} includeMargin />
+              </div>
+            ) : order.qris_error ? (
+              <div className="text-center space-y-3" data-testid="qris-error">
+                <p className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-md px-4 py-3">{order.qris_error}</p>
+                <Button size="sm" variant="outline" onClick={buatQris} data-testid="btn-retry-qris">Coba Buat QR Lagi</Button>
+              </div>
+            ) : (
+              <div className="text-center space-y-3">
+                <p className="text-sm text-indigo-700" data-testid="qris-preparing">Menyiapkan QR pembayaran…</p>
+                <Button size="sm" variant="outline" onClick={buatQris} data-testid="btn-generate-qris">Buat QR Pembayaran</Button>
+              </div>
+            )}
+            {order.qr_string && (
+              <div className="flex items-center gap-2 text-sm text-indigo-700">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+                </span>
+                Menunggu pembayaran — status diperbarui otomatis
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {order.status_pesanan === "MENUNGGU_BAYAR" && order.metode_pembayaran.kode !== "qris_merchant" && (
         <Card className="p-5 border-amber-200 bg-amber-50">
           <h2 className="font-heading font-semibold text-amber-900 mb-2">Instruksi Pembayaran</h2>
           <p className="text-sm text-amber-800">

@@ -134,6 +134,10 @@ class OrderPublic(BaseModel):
     estimasi_sampai: Optional[str] = ""
     catatan_pelanggan: Optional[str] = ""
     catatan_admin: Optional[str] = ""
+    kasera_id: Optional[str] = None
+    qr_string: Optional[str] = None
+    qr_expires_at: Optional[str] = None
+    qris_error: Optional[str] = None
     created_at: datetime
     created_at_fmt: str = ""
 

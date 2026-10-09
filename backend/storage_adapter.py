@@ -27,11 +27,49 @@ class LocalStorage:
         return f"{self.public_prefix}/{new_name}"
 
 
+class GoogleDriveStorage:
+    """Simpan file ke Google Drive via Service Account. Mengembalikan URL publik Drive.
+    Perlu: GDRIVE_SERVICE_ACCOUNT_FILE (path JSON) + GDRIVE_FOLDER_ID (folder tujuan dishare)."""
+
+    def __init__(self, folder_id: str, sa_json_path: str):
+        self.folder_id = folder_id
+        self.sa_json_path = sa_json_path
+        self._svc = None
+
+    def _service(self):
+        if self._svc is None:
+            from google.oauth2 import service_account
+            from googleapiclient.discovery import build
+            creds = service_account.Credentials.from_service_account_file(
+                self.sa_json_path, scopes=["https://www.googleapis.com/auth/drive"])
+            self._svc = build("drive", "v3", credentials=creds, cache_discovery=False)
+        return self._svc
+
+    async def save(self, data: bytes, filename: str, content_type: str) -> str:
+        import io
+        from googleapiclient.http import MediaIoBaseUpload
+        svc = self._service()
+        ext = Path(filename).suffix.lower()
+        meta = {"name": f"{uuid.uuid4().hex}{ext}"}
+        if self.folder_id:
+            meta["parents"] = [self.folder_id]
+        media = MediaIoBaseUpload(io.BytesIO(data), mimetype=content_type, resumable=False)
+        f = svc.files().create(body=meta, media_body=media, fields="id").execute()
+        fid = f["id"]
+        svc.permissions().create(fileId=fid, body={"type": "anyone", "role": "reader"}).execute()
+        return f"https://drive.google.com/uc?export=view&id={fid}"
+
+
 def get_storage() -> StorageBackend:
     backend = os.environ.get("STORAGE_BACKEND", "local").lower()
     if backend == "local":
         return LocalStorage(
             base_dir=os.environ["STORAGE_LOCAL_DIR"],
             public_prefix=os.environ.get("PUBLIC_UPLOAD_PREFIX", "/api/uploads/files"),
+        )
+    if backend == "gdrive":
+        return GoogleDriveStorage(
+            folder_id=os.environ.get("GDRIVE_FOLDER_ID", ""),
+            sa_json_path=os.environ["GDRIVE_SERVICE_ACCOUNT_FILE"],
         )
     raise RuntimeError(f"Storage backend '{backend}' belum didukung")
