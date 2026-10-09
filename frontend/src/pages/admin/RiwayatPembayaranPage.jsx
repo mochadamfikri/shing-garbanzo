@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { formatRupiah, formatTanggalID } from "@/lib/format";
-import { QrCode, RefreshCw, ExternalLink } from "lucide-react";
+import { QrCode, RefreshCw, ExternalLink, Download } from "lucide-react";
 
 const STATUS_LABEL = {
   DIPROSES: { t: "Diproses", c: "text-emerald-600 bg-emerald-50" },
@@ -16,15 +17,31 @@ const STATUS_LABEL = {
 export default function RiwayatPembayaranPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
 
   const load = useCallback(() => {
     setLoading(true);
-    api.get("/orders/admin/pembayaran-qris")
+    api.get("/orders/admin/pembayaran-qris", { params: { start: start || undefined, end: end || undefined } })
       .then((r) => setItems(r.data))
       .finally(() => setLoading(false));
-  }, []);
+  }, [start, end]);
 
   useEffect(() => { load(); }, [load]);
+
+  const downloadCsv = () => {
+    api.get("/orders/admin/pembayaran-qris/csv", { params: { start: start || undefined, end: end || undefined }, responseType: "blob" })
+      .then((r) => {
+        const url = window.URL.createObjectURL(new Blob([r.data]));
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "pembayaran-qris.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      });
+  };
 
   const totalMasuk = items.reduce((s, o) => s + (o.total || 0), 0);
 
@@ -37,9 +54,22 @@ export default function RiwayatPembayaranPage() {
           </h1>
           <p className="text-slate-500 text-sm mt-1">Semua pembayaran QRIS (Kasera) yang telah masuk.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={load} data-testid="btn-refresh-riwayat">
-          <RefreshCw className="w-4 h-4 mr-1.5" /> Muat ulang
-        </Button>
+        <div className="flex items-end gap-2 flex-wrap">
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Dari tanggal</label>
+            <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} className="h-9 w-40" data-testid="filter-start" />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Sampai tanggal</label>
+            <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="h-9 w-40" data-testid="filter-end" />
+          </div>
+          <Button variant="outline" size="sm" onClick={load} data-testid="btn-apply-filter">
+            <RefreshCw className="w-4 h-4 mr-1.5" /> Terapkan
+          </Button>
+          <Button size="sm" onClick={downloadCsv} data-testid="btn-download-csv">
+            <Download className="w-4 h-4 mr-1.5" /> Unduh CSV
+          </Button>
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">

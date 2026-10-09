@@ -1,9 +1,11 @@
 """Endpoint Pesanan: pelanggan checkout, upload bukti, lihat status.
 Admin: list semua pesanan, verifikasi pembayaran, input resi, update status pengiriman."""
+import csv
+import io
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
 from auth import (
     require_roles, ROLE_OWNER, ROLE_ADMIN, ROLE_STAF, ROLE_PELANGGAN,
@@ -18,6 +20,7 @@ from routes_settings import get_settings_internal
 from utils import now_utc, format_tanggal_id
 import logging
 import kasera
+import email_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/orders", tags=["orders"])
@@ -43,6 +46,23 @@ async def mark_order_paid(db, order: dict, oleh: str, catatan: str = "") -> None
                   "qris_paid_at": now_s if oleh.startswith("kasera") else order.get("qris_paid_at"),
                   "updated_at": now_s}},
     )
+
+    # Kirim struk pembayaran via email (non-blocking; lewati bila SMTP belum diset)
+    if email_service.is_configured():
+        try:
+            u = await db.users.find_one({"id": order.get("user_id")})
+            email = (u or {}).get("email")
+            if email:
+                await email_service.send_receipt_qris(
+                    to_email=email,
+                    nama=(u or {}).get("nama") or (order.get("alamat") or {}).get("nama_penerima", "Pelanggan"),
+                    nomor_pesanan=order["nomor_pesanan"],
+                    total=order.get("total", 0),
+                    items=order.get("items", []),
+                    paid_at=format_tanggal_id(now_s),
+                )
+        except Exception:
+            logger.exception("Gagal kirim struk email untuk %s", order.get("nomor_pesanan"))
 
 
 async def release_order_stock(db, order: dict, oleh: str, alasan: str) -> None:
@@ -380,12 +400,27 @@ async def tandai_notifikasi_dibaca(_user=Depends(require_roles(ROLE_OWNER, ROLE_
     return {"dibaca": r.modified_count}
 
 
-@router.get("/admin/pembayaran-qris")
-async def riwayat_pembayaran_qris(_user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))):
-    """Riwayat semua pembayaran QRIS yang masuk (terurut terbaru)."""
+async def _ambil_pembayaran_qris(start: Optional[str], end: Optional[str]) -> list:
     from server import db
-    cursor = db.orders.find({"qris_paid_at": {"$ne": None}}).sort("qris_paid_at", -1).limit(200)
-    docs = await cursor.to_list(200)
+    paid = {"$ne": None}
+    if start or end:
+        paid = {}
+        if start:
+            paid["$gte"] = start + "T00:00:00"
+        if end:
+            paid["$lte"] = end + "T23:59:59.999999"
+    docs = await db.orders.find({"qris_paid_at": paid}).sort("qris_paid_at", -1).limit(1000).to_list(1000)
+    return docs
+
+
+@router.get("/admin/pembayaran-qris")
+async def riwayat_pembayaran_qris(
+    start: Optional[str] = Query(None),
+    end: Optional[str] = Query(None),
+    _user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF)),
+):
+    """Riwayat pembayaran QRIS (filter opsional rentang tanggal YYYY-MM-DD)."""
+    docs = await _ambil_pembayaran_qris(start, end)
     return [{
         "id": d["id"],
         "nomor_pesanan": d["nomor_pesanan"],
@@ -394,6 +429,32 @@ async def riwayat_pembayaran_qris(_user=Depends(require_roles(ROLE_OWNER, ROLE_A
         "status_pesanan": d.get("status_pesanan"),
         "kasera_id": d.get("kasera_id"),
     } for d in docs]
+
+
+@router.get("/admin/pembayaran-qris/csv")
+async def riwayat_pembayaran_qris_csv(
+    start: Optional[str] = Query(None),
+    end: Optional[str] = Query(None),
+    _user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF)),
+):
+    """Unduh riwayat pembayaran QRIS sebagai CSV."""
+    docs = await _ambil_pembayaran_qris(start, end)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Nomor Pesanan", "Waktu Bayar", "Nominal", "Status", "Kasera ID"])
+    for d in docs:
+        writer.writerow([
+            d.get("nomor_pesanan", ""),
+            d.get("qris_paid_at", ""),
+            d.get("total", 0),
+            d.get("status_pesanan", ""),
+            d.get("kasera_id", ""),
+        ])
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=pembayaran-qris.csv"},
+    )
 
 
 @router.get("", response_model=List[OrderPublic])
