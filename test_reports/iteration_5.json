@@ -1,0 +1,31 @@
+{
+  "summary": "Iteration 5 - Fase 4 Laporan Keuangan + Pengeluaran + Export CSV. Backend: 21/21 pytest PASS. All endpoints behaved as spec: /api/reports/summary returns rentang/omzet/hpp/laba_kotor/pengeluaran/laba_bersih/profit_loss/unit_terjual/total_pesanan/top_produk; /api/reports/timeseries returns harian[] with all 8 fields and mingguan_ohlc[] with open/high/low/close/volume_unit; /api/reports/inventory-value returns total_unit/total_modal/total_nilai_jual/estimasi_laba_potensial/per_merek. Expense validation (kategori/nominal/tanggal) returns 400 correctly; delete missing -> 404. Role gating confirmed: pelanggan 403 on all /api/reports/* and /api/expenses/*. CSV exports keuangan/penjualan/pengeluaran return text/csv with Content-Disposition attachment and correct filename pattern. laba_bersih = laba_kotor - pengeluaran verified after creating Rp500k LISTRIK (summary.pengeluaran >= 500k). Frontend UI (verified via Playwright at /admin/laporan + /admin/pengeluaran): 6 KPI cards render in Rupiah, 4 tabs switch properly (Pergerakan Keuangan AreaChart, Tingkat Penjualan ComposedChart, Candle OHLC, Rincian), quick range buttons (7/30/1 Tahun) update dates + Terapkan reloads, Export buttons open correct /api/reports/export?jenis=... URLs. Pengeluaran page: Add expense form (kategori select INTERNET, nominal 250000, tanggal, keterangan 'TEST UI pengeluaran') saved and visible in table; delete via trash button confirmed removes row. End-to-end PASS.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "LaporanPage AreaChart", "issues": ["AreaChart renders a Line component as child -- recharts allows this but mixing Area+Line in AreaChart technically works, consider ComposedChart for pure consistency (nice-to-have, not blocking)."]},
+      {"screen": "LaporanPage OHLC toast", "issues": ["Toast on sticky position overlaps dropdown of user menu / top-right area briefly; visual only."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_phase4.py",
+    "/app/test_reports/pytest/phase4.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes_reports._fetch_orders filters by created_at string isoformat gte/lte -- works because created_at is stored as ISO string and ISO strings are lexicographically comparable; acceptable but fragile if timezone format varies.",
+    "routes_reports._parse_date catches all exceptions silently and falls back to default range -- consider returning 400 for invalid date so UI can surface issues.",
+    "OHLC body rendered as [bodyMin,bodyMax] but when open==close the bar is invisible (height 0); add a 1-pixel visual fallback for doji candles (nice-to-have).",
+    "Expense delete returns {message} without a 204 -- acceptable but inconsistent with other DELETE endpoints that may return 200/204; minor.",
+    "LaporanPage useEffect omits [start,end] deps intentionally (eslint-disable) and uses manual 'Terapkan' button -- good UX decision, acknowledged."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (21/21 pytest)", "frontend": "100% - full Laporan + Pengeluaran UI flows pass"},
+  "test_credentials": "Owner: owner@tokohp.id / Admin@12345. Test pelanggan created ad-hoc per fixture (TEST_p4_*).",
+  "seed_data_creation": "Created 1 expense LISTRIK Rp500k (deleted at end of test); 1 expense INTERNET Rp250k via UI (deleted); residual LISTRIK Rp500k 'Listrik toko Oktober' remains in DB from manual earlier context (visible in UI screenshot).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Fase 4 fully green. HPP shows 0 for legacy orders (pre-modal-snapshot) as expected and documented; new orders after this iteration will populate modal snapshot and HPP will be accurate. All 6 KPI cards + 4 tabs + export CSV + expense CRUD verified end-to-end. No fixes required."
+}

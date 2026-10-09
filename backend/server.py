@@ -1,89 +1,134 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+"""Entry utama FastAPI - Sistem Manajemen Toko HP."""
 import os
+import uuid
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
-import uuid
-from datetime import datetime, timezone
 
-
+from dotenv import load_dotenv
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(ROOT_DIR / ".env")
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from motor.motor_asyncio import AsyncIOMotorClient
+
+from auth import hash_password, verify_password, ROLE_OWNER
+from utils import now_utc
+
+# --- Mongo ---
+mongo_url = os.environ["MONGO_URL"]
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.environ["DB_NAME"]]
 
-# Create the main app without a prefix
-app = FastAPI()
+# --- FastAPI ---
+app = FastAPI(title="Sistem Manajemen Toko HP")
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
-
-
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Include the router in the main app
-app.include_router(api_router)
+# CORS
+origins_env = os.environ.get("CORS_ORIGINS", "*")
+if origins_env.strip() == "*":
+    cors_kwargs = {"allow_origins": ["*"], "allow_credentials": False}
+else:
+    cors_kwargs = {"allow_origins": [o.strip() for o in origins_env.split(",") if o.strip()], "allow_credentials": True}
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    CORSMiddleware, allow_methods=["*"], allow_headers=["*"], **cors_kwargs,
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# Static uploads - mount pada sub-path agar tidak bentrok dengan POST /api/uploads/*
+upload_dir = os.environ.get("STORAGE_LOCAL_DIR", str(ROOT_DIR / "uploads"))
+Path(upload_dir).mkdir(parents=True, exist_ok=True)
+app.mount("/api/uploads/files", StaticFiles(directory=upload_dir), name="uploads")
+
+# Routers
+from routes_auth import router as auth_router
+from routes_inventory import router as inventory_router
+from routes_uploads import router as uploads_router
+from routes_dashboard import router as dashboard_router
+from routes_catalog import router as catalog_router
+from routes_customer import router as customer_router
+from routes_settings import router as settings_router
+from routes_orders import router as orders_router
+from routes_reports import router as reports_router
+from routes_expenses import router as expenses_router
+
+app.include_router(auth_router)
+app.include_router(inventory_router)
+app.include_router(uploads_router)
+app.include_router(dashboard_router)
+app.include_router(catalog_router)
+app.include_router(customer_router)
+app.include_router(settings_router)
+app.include_router(orders_router)
+app.include_router(reports_router)
+app.include_router(expenses_router)
+
+# Logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
+# --- Health ---
+@app.get("/api/")
+async def root():
+    return {"message": "Sistem Manajemen Toko HP - API aktif"}
+
+
+@app.get("/api/health")
+async def health():
+    try:
+        await db.command("ping")
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+
+# --- Startup: indexes + seed owner ---
+@app.on_event("startup")
+async def on_startup():
+    await db.users.create_index("email", unique=True)
+    await db.users.create_index("id", unique=True)
+    await db.units.create_index("id", unique=True)
+    await db.units.create_index("imei_1")
+    await db.units.create_index("imei_2")
+    await db.units.create_index("status_stok")
+    await db.units.create_index("status_publikasi")
+    await db.audit_logs.create_index([("at", -1)])
+    await db.addresses.create_index("user_id")
+    await db.addresses.create_index("id", unique=True)
+    await db.carts.create_index("user_id", unique=True)
+    await db.orders.create_index("id", unique=True)
+    await db.orders.create_index("nomor_pesanan", unique=True)
+    await db.orders.create_index("user_id")
+    await db.orders.create_index("status_pesanan")
+    await db.settings.create_index("id", unique=True)
+    await db.expenses.create_index("id", unique=True)
+    await db.expenses.create_index("tanggal")
+
+    owner_email = os.environ.get("OWNER_EMAIL", "owner@tokohp.id").lower()
+    owner_password = os.environ.get("OWNER_PASSWORD", "Admin@12345")
+    existing = await db.users.find_one({"email": owner_email})
+    if existing is None:
+        await db.users.insert_one({
+            "id": str(uuid.uuid4()),
+            "email": owner_email,
+            "password_hash": hash_password(owner_password),
+            "nama": "Pemilik Toko",
+            "role": ROLE_OWNER,
+            "aktif": True,
+            "token_version": 0,
+            "created_at": now_utc().isoformat(),
+        })
+        logger.info("Seed Owner dibuat: %s", owner_email)
+    else:
+        if not verify_password(owner_password, existing.get("password_hash", "")):
+            await db.users.update_one(
+                {"email": owner_email},
+                {"$set": {"password_hash": hash_password(owner_password)}},
+            )
+            logger.info("Password Owner disinkronkan dari .env")
+
+
 @app.on_event("shutdown")
-async def shutdown_db_client():
+async def on_shutdown():
     client.close()

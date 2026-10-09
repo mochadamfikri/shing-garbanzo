@@ -1,0 +1,38 @@
+{
+  "summary": "Iteration 4 retest - CRITICAL FIX VERIFIED. /api/uploads/image now accepts ROLE_PELANGGAN and returns 200 with {url,size,content_type}. Full Phase 3 lifecycle re-passed: (1) pelanggan register/login OK, (2) address add OK, (3) add-to-cart OK, (4) checkout -> MENUNGGU_BAYAR OK (unit->HOLD), (5) UI upload bukti via PesananDetailPage input works -> order moves to MENUNGGU_VERIFIKASI, bukti image displays, (6) owner /admin/pesanan list shows order, (7) /admin/pesanan/{id} shows bukti + Terima/Tolak buttons, (8) click Terima + window.confirm -> status DIPROSES, Pengiriman panel appears, unit status TERJUAL (history: TERSEDIA->HOLD->TERJUAL), (9) fill nomor_resi=JNE12345, status DIKIRIM, Simpan Pengiriman -> status_pesanan=DIKIRIM, (10) empty-string PATCH on /api/orders/{id}/resi correctly filtered (nomor_resi NOT overwritten with ''). Settings QRIS toggle works and /api/settings/public reflects pembayaran_aktif including qris_merchant. Backend pytest 14/14 PASS. All E2E API script checks PASS.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/orders/{id}/batal", "issue": "Still sets status_pembayaran=DITOLAK even for self-cancel; semantics 'DIBATALKAN' more accurate (carried over from i3)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "PesananDetailPage", "issues": ["Hydration warning: <p> contains <Badge/div> producing React warning 'div cannot be a descendant of p'. Does not break UI but should be fixed by replacing <p> wrapper with <div>."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_phase3.py",
+    "/app/test_reports/pytest/phase3_i4.xml"
+  ],
+  "action_items": [
+    "(Nice-to-have) Fix hydration warning in PesananDetailPage.jsx line 102: replace <p className=\"text-sm mt-2\"><Badge/></p> with <div> (Badge renders a <div> inside)",
+    "(Carried over - optional) Normalise whatsapp_pesan_default between models.py and routes_settings DEFAULT_SETTINGS",
+    "(Carried over - optional) AkunPage: link <Label htmlFor> to <Input id> for a11y"
+  ],
+  "critical_code_review_comments": [
+    "Fix for /api/uploads/image role gating is minimal and correct (added ROLE_PELANGGAN only on image route, video still staff-only). Size (10MB) & mime restrictions preserved - safe.",
+    "routes_orders.update_resi filter 'v != \"\"' now correctly guards empty strings from UI; verified via E2E.",
+    "No background job to expire HOLD when hold_batas < now (carried over from i3)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (14/14 pytest + E2E API script 11/11)", "frontend": "100% - full flow checkout->bukti->verifikasi->resi end-to-end works"},
+  "test_credentials": "Owner: owner@tokohp.id / Admin@12345. UI retest pelanggan: test_ui4_bf1d7f@example.id / Pelanggan@123 (order DIKIRIM with resi JNE12345).",
+  "seed_data_creation": "Created Samsung A54 unit (TERJUAL after flow) + 1 pelanggan + 1 completed order ORD-20261008-824DB0 (status DIKIRIM, resi JNE12345). Additional Xiaomi unit from e2e script also TERJUAL.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Phase 3 fully green after iteration 4 fix. The only remaining user-visible nit is a React hydration warning (p>div) on PesananDetailPage - harmless. All upload / verify / resi flows pass both via API and real browser UI.",
+  "rca of the issue": "Previous iteration_3 blocker: /api/uploads/image was role-gated to OWNER/ADMIN/STAF via require_roles. The pelanggan UI (PesananDetailPage.jsx line ~35) called this exact endpoint when uploading bukti bayar, triggering 403 'Hak akses tidak mencukupi'. Fix: routes_uploads.py line 17 now reads require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF, ROLE_PELANGGAN) only for the /image route (video unchanged). Verified: pelanggan upload returns 200 with proper payload; subsequent POST /api/orders/{id}/bukti-bayar attaches URL and advances status to MENUNGGU_VERIFIKASI as expected."
+}

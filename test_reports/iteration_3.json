@@ -1,0 +1,51 @@
+{
+  "summary": "Phase 3 testing: 14/14 backend pytest cases PASS (settings public/admin/patch, checkout success w/ unit→HOLD, empty-cart 400, inactive-method 400, admin forbidden 403, reservasi (second customer blocked at cart-add), /orders/mine, cross-customer 404, upload bukti, admin list + filter, verifikasi-bayar accept (DIPROSES+DITERIMA+unit TERJUAL), reject (DIBATALKAN+DITOLAK+unit TERSEDIA), pelanggan batal, resi update → DIKIRIM, DITERIMA → SELESAI, role gating). Frontend: WhatsApp float visible on home with correct wa.me/628123456789 href; customer registration → /akun; address add via /akun; add-to-cart; /keranjang 'Lanjut ke Checkout' nav; /checkout page renders ship/pay radio from settings publik; place order creates ORD-YYYYMMDD-XXXXXX, redirects to /pesanan/{id} showing instruksi transfer + Rp total; admin /admin/pesanan list contains order; admin detail page renders. Settings UI: WA number save + Simpan works (verified via public API). CRITICAL BUG: Pelanggan cannot upload bukti bayar — frontend posts to /api/uploads/image which require_roles(OWNER,ADMIN,STAF) → 403 'Hak akses tidak mencukupi'. This blocks the full UI flow (Terima/Tolak buttons only render when order.bukti_bayar_url exists, so admin verifikasi + pengiriman form cannot be reached via UI without manually hitting /api/orders/{id}/bukti-bayar). Backend verifikasi/resi endpoints themselves are correct (proven by pytest test_full_lifecycle).",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/uploads/image", "issue": "Role-gated to OWNER/ADMIN/STAF only — pelanggan cannot upload bukti bayar from UI (frontend calls this exact endpoint from PesananDetailPage.jsx:35). Fix: allow pelanggan to upload too, OR move bukti upload to a dedicated endpoint under /api/orders/{id}/bukti-bayar/upload that both role-checks and stores file.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "POST /api/orders/{id}/batal", "issue": "Sets status_pembayaran=DITOLAK even when pelanggan cancels (not admin rejection). Semantics suggest 'DIBATALKAN' pembayaran state would be more accurate, but DITOLAK is acceptable."},
+      {"endpoint": "GET /api/settings/public", "issue": "whatsapp_pesan_default default string differs from DEFAULT_SETTINGS seed ('…tentang produk di Toko HP' vs model default '…tentang produk.'). Minor inconsistency, no functional impact."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PesananDetailPage upload bukti", "issue": "Clicking Upload Bukti Transfer returns 403 ('Hak akses tidak mencukupi') because api.post('/uploads/image') requires staff role. Entire payment-verification flow depends on this.", "selector": "[data-testid=input-upload-bukti]", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [
+      {"flow": "Pelanggan upload bukti → admin verify → admin resi", "issue": "Admin Terima/Tolak buttons gated by order.bukti_bayar_url. Since pelanggan can't upload (bug above), admin cannot verify from UI; and pengiriman form is gated by canShip (status DIPROSES/DIKIRIM) which requires verify first.", "affected_selectors": ["[data-testid=btn-verify-accept]","[data-testid=btn-verify-reject]","[data-testid=input-resi]"]}
+    ],
+    "design_issues": [
+      {"screen": "AkunPage address form", "issues": ["Labels not linked to inputs via htmlFor/id — accessibility: get_by_label fails, screen readers may not associate labels. Use <Label htmlFor=\"nama_penerima\"> + <Input id=\"nama_penerima\">."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_phase3.py",
+    "/app/test_reports/pytest/phase3.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Allow pelanggan to upload bukti image. Either (a) relax /api/uploads/image role to also accept ROLE_PELANGGAN (with size/mime safeguards), or (b) add POST /api/orders/{id}/bukti-bayar/file that accepts multipart from pelanggan and sets bukti_bayar_url in one call.",
+    "After fix, re-run UI flow: upload image → MENUNGGU_VERIFIKASI → owner /admin/pesanan/{id} shows Terima/Tolak → click Terima → DIPROSES + Pengiriman form appears → fill RESI + status DIKIRIM → status DIKIRIM.",
+    "(Optional UX) In AkunPage, link <Label htmlFor> to <Input id> for all form fields for accessibility and testability.",
+    "(Optional) Normalise whatsapp_pesan_default between models.py default and routes_settings DEFAULT_SETTINGS to a single constant."
+  ],
+  "critical_code_review_comments": [
+    "routes_orders.checkout rollback: the try/except catches all exceptions including HTTPException raised inside the loop AFTER some units were reserved - good. But rolled-back units lose their new history_status 'HOLD' push (push already executed by $set+$push atomically); on rollback you set status to TERSEDIA but history still shows HOLD then TERSEDIA. Harmless but inflates history.",
+    "routes_orders.batal_pesanan always writes status_pembayaran=DITOLAK even for self-cancellation (status could stay BELUM_BAYAR / set CANCELLED).",
+    "routes_orders.update_resi exclude_unset filter: payload.model_dump(exclude_unset=True) only works correctly if client omits unset fields. UI sends empty strings — those pass through and overwrite nomor_resi with ''. Consider filtering empty strings too.",
+    "routes_settings._load auto-inserts DEFAULT_SETTINGS on first call — races between two first-call requests could insert twice if no unique index key; mitigated by unique index on 'id' created at startup. OK.",
+    "No background job to expire HOLD when hold_batas < now. 30-minute reservation will stay HOLD forever if customer abandons; stock permanently blocked. Needs cron/scheduler in later phase.",
+    "OrderAdminDetailPage: Terima/Tolak buttons only render when bukti_bayar_url exists; backend accepts verify from MENUNGGU_BAYAR too — frontend prevents admin from accepting without proof (reasonable), but combined with the upload bug makes the whole flow unreachable.",
+    "No role check in frontend ProtectedRoute for /pesanan or /checkout aside from redirect; backend enforces it (good)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_phase3.py (new)"
+  ],
+  "success_rate": {"backend": "100% (14/14)", "frontend": "~70% — WhatsApp float, register, address, cart, checkout, order creation, admin list/detail, settings-identity save all verified; bukti-upload + admin verify + resi UI flow blocked by upload role bug"},
+  "test_credentials": "Owner: owner@tokohp.id / Admin@12345. Registered multiple TEST_p3_*@example.id and TEST_fe3*_*@example.id with Pelanggan@123.",
+  "seed_data_creation": "Multiple TAYANG Apple/Xiaomi/etc units for phase 3. Primary UI test unit id: 931f5a90-c369-450b-b848-a3d3d4ff2ad1 (Xiaomi Redmi Note 12, Rp 3.500.000) — reused for sample order 254d9d2e-0735-4fb4-8360-6d99e701e8c7 (currently MENUNGGU_BAYAR, awaiting bukti).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "After the upload-role fix, re-run frontend flow: register pelanggan → add address → add unit to cart → /checkout → Buat Pesanan → upload bukti (should now set MENUNGGU_VERIFIKASI) → login owner → /admin/pesanan/{id} → Terima → fill resi → set status DIKIRIM. Backend test_phase3.py already covers the end-to-end API lifecycle; no changes needed there. Note pytest.ini uses -n 2 --dist loadscope — do NOT modify. Settings QRIS toggle via UI needs longer wait (>2s) after Switch click before saving due to Radix controlled state."
+}

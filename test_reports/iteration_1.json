@@ -1,0 +1,38 @@
+{
+  "summary": "First-run smoke testing of Toko HP admin panel. Backend auth, inventory CRUD, Luhn validation, duplicate check, profit calc, dashboard, archive, and 401 unauth all PASS. Upload endpoints (image/video) FAIL with 405 due to StaticFiles mount at /api/uploads shadowing POST routes. Frontend login works, dashboard shows stats, inventaris list renders with DD/BULAN/YYYY date format, form page renders with all required fields and Keuangan panel (Total Modal, Estimasi Laba Kotor).",
+  "tested_scope": ["frontend", "backend", "auth", "integration"],
+  "passed": [
+    "POST /api/auth/login returns user + sets httpOnly access_token & refresh_token cookies",
+    "GET /api/auth/me returns owner data (role=owner)",
+    "POST /api/auth/logout returns 200",
+    "GET /api/dashboard/summary returns all expected keys (total_unit, tersedia, hold, terjual, servis, arsip, nilai_modal_stok, nilai_jual_stok, estimasi_laba_potensial, performa_merek)",
+    "POST /api/inventory rejects IMEI '123' with 400",
+    "POST /api/inventory rejects 15-digit non-Luhn IMEI with 400 (message: 'Checksum IMEI (Luhn) tidak valid')",
+    "POST /api/inventory/validate-imei returns {valid:true, duplicate:false} for 356938035643809",
+    "POST /api/inventory creates unit with valid Luhn IMEI; total_modal=10,500,000, estimasi_laba_kotor=2,500,000 (correct)",
+    "POST /api/inventory rejects duplicate IMEI with 409",
+    "GET /api/inventory lists units",
+    "GET /api/inventory/{id} returns detail",
+    "PATCH /api/inventory/{id} updates status_stok to HOLD with alasan_hold",
+    "DELETE /api/inventory/{id} archives (status_stok=DIARSIPKAN)",
+    "GET /api/inventory without token returns 401",
+    "Frontend /masuk login with owner@tokohp.id redirects to /admin",
+    "Frontend dashboard renders stats cards with Rupiah formatting",
+    "Frontend /admin/inventaris lists unit with status badge, date format 08/OKTOBER/2026",
+    "Frontend /admin/inventaris/baru form renders with all fields + Scan button + Keuangan panel (Total Modal, Estimasi Laba Kotor)"
+  ],
+  "failed": [
+    {
+      "area": "Backend uploads",
+      "issue": "POST /api/uploads/image and /api/uploads/video return 405 Method Not Allowed. Root cause: in /app/backend/server.py line 41 `app.mount('/api/uploads', StaticFiles(...))` intercepts the entire /api/uploads/* path before the uploads router (included later on line 51) can handle POST requests. StaticFiles only allows GET/HEAD.",
+      "evidence": "curl POST /api/uploads/image with valid PNG multipart -> status 405 body {\"detail\":\"Method Not Allowed\"}. Same for /api/uploads/video.",
+      "priority": "HIGH"
+    }
+  ],
+  "action_items": [
+    "Fix route conflict in /app/backend/server.py: either (a) mount StaticFiles on a different path like /api/uploads-static and update PUBLIC_UPLOAD_PREFIX, or (b) mount StaticFiles on a sub-path such as /api/uploads/files and adjust routes_uploads.py to return URLs under that sub-path, or (c) use a custom route that serves files only on GET while leaving POST handlers active. The current mount makes upload endpoints unreachable, which will break photo/video upload in the Tambah Unit flow."
+  ],
+  "success_rate": {"backend": "89% (17/19)", "frontend": "100% of smoke flows verified visually"},
+  "retest_needed": true,
+  "full_testing_deferred": true
+}
