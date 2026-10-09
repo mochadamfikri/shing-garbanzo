@@ -110,3 +110,8 @@ Hasil testing iteration_5: Backend 21/21 pytest + UI 100% end-to-end PASS.
 - **Batas QRIS pintar** di checkout (>Rp10jt sembunyikan QRIS) + **hitung mundur & perbarui QR** di detail pesanan. Terverifikasi.
 - **Google Drive BELUM aktif**: file yang diunggah user adalah OAuth Client ID (`web.client_secret`), BUKAN Service Account (`private_key`). Perlu JSON Service Account yang benar.
 - **Pesanan uji bayar Rp 1.000** (ORD-20261009-AD4889, akun `ujibayar@tokohp.id`) sengaja dipertahankan untuk uji pembayaran nyata oleh user.
+
+## Update 09/OKTOBER/2026 (lanjutan 2)
+- **Filter + Unduh CSV** pada `/admin/pembayaran-qris`: filter rentang tanggal (`start`/`end`) + ekspor CSV (UTF-8 BOM). Endpoint `GET /api/orders/admin/pembayaran-qris[?start&end]` & `/csv`. Lolos testing 100% (11/11 pytest + frontend).
+- **Email Struk Pembayaran (SMTP)**: `email_service.py` kirim struk HTML saat QRIS lunas via `mark_order_paid`. Mendukung Hostinger (`smtp.hostinger.com:465`) & Gmail (App Password). Non-blocking (`run_in_threadpool`), di-skip aman bila SMTP env kosong. Env: `SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASSWORD/EMAIL_FROM` (masih kosong → menunggu kredensial user).
+- **Google Drive DINONAKTIFKAN** sesuai permintaan user (STORAGE_BACKEND=local). Kode adapter tetap ada tapi tidak dipakai.

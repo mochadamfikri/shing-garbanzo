@@ -451,8 +451,8 @@ async def riwayat_pembayaran_qris_csv(
             d.get("kasera_id", ""),
         ])
     return Response(
-        content=output.getvalue(),
-        media_type="text/csv",
+        content="\ufeff" + output.getvalue(),
+        media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=pembayaran-qris.csv"},
     )
 

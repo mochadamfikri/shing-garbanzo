@@ -1,0 +1,20 @@
+{
+  "summary": "Phase 5 (Riwayat Pembayaran QRIS + filter tanggal + unduh CSV + notifikasi admin + SMTP skip) tested end-to-end. Backend pytest: 11/11 PASS (test_phase5_qris.py). Covers: GET /api/orders/admin/pembayaran-qris list all (seeds ORD-SEED-A & ORD-SEED-B present), filter today only (returns ORD-SEED-A, excludes ORD-SEED-B), filter 2020 empty, auth required (401); CSV endpoint returns text/csv with Content-Disposition attachment, header 'Nomor Pesanan,Waktu Bayar,Nominal,Status,Kasera ID' + ORD-SEED-A row, filter applied, auth required; GET /api/orders/admin/notifikasi returns {count:2, items} (seeds admin_notif_qris=true), POST /admin/notifikasi/baca marks all read (count->0), auth required; GET /api/settings/public exposes qris_merchant. Frontend (Playwright, owner login via /masuk cookie-based auth): /admin/pembayaran-qris loads riwayat-qris-page; initial Count=2, Total=Rp 7.500.000, 2 riwayat-row-* rendered; after fill filter-start=filter-end=today + btn-apply-filter -> 1 row (ORD-SEED-A); btn-download-csv triggers real browser download (pembayaran-qris.csv). Header lonceng btn-notif shows notif-badge '2'; opens notif-panel; btn-notif-read empties badge; notif-lihat-semua navigates to /admin/pembayaran-qris. SMTP intentionally not configured (SMTP_HOST empty) - email send properly skipped, no backend errors, QRIS flow + settings endpoint healthy.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_phase5_qris.py", "/app/test_reports/pytest/phase5.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes_orders._ambil_pembayaran_qris filters qris_paid_at by lexicographic string compare (start+'T00:00:00' / end+'T23:59:59.999999'). Works because qris_paid_at is stored as ISO string with +00:00 offset so sort is monotonically correct. Fragile if a document ever gets stored with a different tz (e.g. +07:00) — lex compare would misclassify. Nice-to-have: parse into datetime for comparison or require storage normalization.",
+    "CSV endpoint uses csv module with default dialect and no BOM. Opening pembayaran-qris.csv in Excel ID locale with Unicode nomor pesanan is fine for ASCII seeds, but future orders with non-ASCII customer data would benefit from utf-8-sig BOM for Excel.",
+    "GET /admin/notifikasi hard-caps at 50 docs without pagination; acceptable for a bell indicator but could miss older unread items in extreme cases.",
+    "email_service is_configured() short-circuit is good; however mark_order_paid wraps send in try/except — ensure it logs the exception path so misconfigured SMTP future failures are visible (not silently swallowed)."
+  ],
+  "updated_files": ["/app/backend/tests/test_phase5_qris.py"],
+  "success_rate": {"backend": "100% (11/11 pytest)", "frontend": "100% - filter + CSV + notifikasi flows all pass"},
+  "test_credentials": "Owner: owner@tokohp.id / Admin@12345 (cookie-based auth: access_token/refresh_token are HttpOnly cookies). API tests must use requests.Session() after /api/auth/login — Bearer header not required when cookies carried.",
+  "seed_data_creation": "No new seed added. Test marks notifikasi as read then restored via mongosh (db.orders.updateMany({nomor_pesanan:/SEED/},{$set:{admin_notif_qris:true}})) at the end so main agent sees both seeds unread.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Seed data (ORD-SEED-A today, ORD-SEED-B ~40d ago) left intact and admin_notif_qris reset to true after tests. Note login response does NOT contain a token field — tokens are set as HttpOnly cookies, so pytest fixtures should use requests.Session and pass session to tests (see test_phase5_qris.py pattern)."
+}
