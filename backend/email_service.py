@@ -107,3 +107,38 @@ async def send_receipt_qris(*, to_email, nama, nomor_pesanan, total, items, paid
     return await run_in_threadpool(
         _send_sync, to_email, nama, nomor_pesanan, total, items, paid_at
     )
+
+
+def _send_auth_code_sync(to_email: str, code: str, purpose: str) -> bool:
+    """Kirim kode keamanan menggunakan SMTP yang sudah dikonfigurasi di .env."""
+    cfg = _config()
+    if cfg is None:
+        raise RuntimeError("SMTP belum dikonfigurasi; pengiriman kode dibatalkan")
+    host, port, user, password, sender = cfg
+    title = "Verifikasi Email" if purpose == "verify" else "Reset Kata Sandi"
+    msg = EmailMessage()
+    msg["Subject"] = f"{title} - Sadam Gadget"
+    msg["From"] = sender
+    msg["To"] = to_email
+    msg.set_content(
+        f"Kode {title.lower()} akun Sadam Gadget Anda: {code}\\n"
+        "Kode berlaku selama 10 menit, hanya dapat digunakan sekali.\\n"
+        "Jangan berikan kode ini kepada siapa pun. Jika Anda tidak meminta kode, abaikan email ini."
+    )
+    ctx = ssl.create_default_context()
+    if port == 465:
+        with smtplib.SMTP_SSL(host, port, context=ctx, timeout=20) as smtp:
+            smtp.login(user, password)
+            smtp.send_message(msg)
+    else:
+        with smtplib.SMTP(host, port, timeout=20) as smtp:
+            smtp.ehlo()
+            smtp.starttls(context=ctx)
+            smtp.ehlo()
+            smtp.login(user, password)
+            smtp.send_message(msg)
+    return True
+
+
+async def send_auth_code(to_email: str, code: str, purpose: str) -> bool:
+    return await run_in_threadpool(_send_auth_code_sync, to_email, code, purpose)
