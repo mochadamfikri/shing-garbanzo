@@ -16,6 +16,15 @@ export function SettingsProvider({ children }) {
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    if (!settings) return;
+    document.title = `${settings.nama_toko || "Toko HP"} | Toko Online`;
+    if (settings.logo_url) {
+      let ico = document.querySelector('link[rel="icon"]');
+      if (!ico) { ico=document.createElement("link");ico.rel="icon";document.head.appendChild(ico); }
+      ico.href=settings.logo_url;
+    }
+  }, [settings]);
 
   return (
     <SettingsCtx.Provider value={{ settings, refresh }}>
