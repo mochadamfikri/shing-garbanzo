@@ -95,3 +95,6 @@ frontend/node_modules/.cache/default-development/1.pack
 credentials.json
 *.key
 .credentials
+
+# Runtime uploads outside of Git tracking
+/data/
