@@ -22,6 +22,8 @@ DEFAULT_SETTINGS = SettingsAdmin(
     hero_image_url="",
     hero_judul="Smartphone pilihan, dengan garansi toko.",
     hero_subjudul="IMEI terverifikasi, kondisi diperiksa, harga transparan.",
+    footer_deskripsi="Smartphone resmi & inter dengan garansi toko.",
+    footer_tagline="Belanja smartphone dengan nyaman dan aman",
     pembayaran=[
         MetodePembayaranConfig(
             kode="transfer_bank", nama="Transfer Bank Manual", aktif=True, prioritas=1,
