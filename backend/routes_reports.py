@@ -4,7 +4,7 @@ import csv
 import io
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Response, HTTPException
 
 from auth import require_roles, ROLE_OWNER, ROLE_ADMIN
 from utils import now_utc, format_tanggal_id
@@ -215,6 +215,8 @@ async def export_csv(
     _user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN)),
 ):
     from server import db
+    if jenis not in {"keuangan", "penjualan", "pengeluaran"}:
+        raise HTTPException(422, "Jenis ekspor harus keuangan, penjualan, atau pengeluaran")
     s, e = _default_range(start, end)
     buf = io.StringIO()
     writer = csv.writer(buf)
@@ -265,7 +267,7 @@ async def export_csv(
         fname = f"keuangan_{s.strftime('%Y%m%d')}_{e.strftime('%Y%m%d')}.csv"
 
     return Response(
-        content=buf.getvalue(),
-        media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+        content="\ufeff" + buf.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"', "Cache-Control": "no-store"},
     )
