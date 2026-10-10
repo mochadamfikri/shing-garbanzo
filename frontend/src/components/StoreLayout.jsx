@@ -123,8 +123,11 @@ export default function StoreLayout() {
       <footer className="border-t border-slate-100 py-10 mt-10 bg-slate-50">
         <div className="max-w-6xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
           <div>
-            <p className="font-heading font-bold">Toko HP</p>
-            <p className="text-slate-500 mt-1">Smartphone resmi & inter dengan garansi toko.</p>
+            <div className="flex items-center gap-2">
+              {settings?.logo_url && <img src={settings.logo_url} alt="" className="w-8 h-8 rounded-md object-contain shrink-0" />}
+              <p className="font-heading font-bold">{settings?.nama_toko || "Toko HP"}</p>
+            </div>
+            <p className="text-slate-500 mt-2 whitespace-pre-line break-words">{settings?.footer_deskripsi ?? "Smartphone resmi & inter dengan garansi toko."}</p>
           </div>
           <div>
             <p className="font-semibold mb-2">Belanja</p>
@@ -148,9 +151,9 @@ export default function StoreLayout() {
             </ul>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto px-5 pt-6 mt-6 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
-          <span>© {new Date().getFullYear()} Toko HP</span>
-          <span>Belanja smartphone dengan nyaman dan aman</span>
+        <div className="max-w-6xl mx-auto px-5 pt-6 mt-6 border-t border-slate-200 text-xs text-slate-500 flex flex-wrap gap-2 items-center justify-between">
+          <span>© {new Date().getFullYear()} {settings?.nama_toko || "Toko HP"}</span>
+          <span className="break-words">{settings?.footer_tagline ?? "Belanja smartphone dengan nyaman dan aman"}</span>
         </div>
       </footer>
     </div>
