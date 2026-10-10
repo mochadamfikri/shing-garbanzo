@@ -9,6 +9,7 @@ import { LayoutDashboard, Smartphone, LogOut, Store, Menu, ShoppingCart, Setting
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth as useAuthHook } from "@/lib/auth";
+import { useSettings } from "@/lib/settings";
 
 const NAV_ALL = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, testId: "nav-dashboard" },
@@ -24,6 +25,7 @@ const NAV_ALL = [
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
+  const { settings } = useSettings();
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const [notif, setNotif] = useState({ count: 0, items: [] });
@@ -70,8 +72,8 @@ export default function AdminLayout() {
               <Menu className="w-5 h-5" />
             </Button>
             <Link to="/admin" className="flex items-center gap-2 font-heading font-bold text-lg tracking-tight">
-              <span className="w-7 h-7 rounded-md bg-[#0052FF] text-white flex items-center justify-center text-xs">TH</span>
-              Toko HP · Admin
+              {settings?.logo_url?<img src={settings.logo_url} alt="Logo toko" className="w-7 h-7 object-contain rounded-md"/>:<span className="w-7 h-7 rounded-md bg-[#0052FF] text-white flex items-center justify-center text-xs">TH</span>}
+              {settings?.nama_toko||"Toko HP"} · Admin
             </Link>
           </div>
           <div className="flex items-center gap-2">
