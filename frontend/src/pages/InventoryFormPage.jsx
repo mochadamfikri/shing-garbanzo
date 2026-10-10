@@ -30,7 +30,7 @@ const EMPTY = {
 export default function InventoryFormPage({ mode = "create" }) {
   const { id } = useParams();
   const nav = useNavigate();
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(() => { const imei = new URLSearchParams(window.location.search).get("imei") || ""; return {...EMPTY, imei_1: /^\d{15}$/.test(imei) && mode === "create" ? imei : ""}; });
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanTarget, setScanTarget] = useState("imei_1");
   const [imeiCheck1, setImeiCheck1] = useState({ ok: null, message: "" });
