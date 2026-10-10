@@ -46,6 +46,9 @@ class SettingsPublic(BaseModel):
     alamat_toko: str = ""
     email_toko: str = ""
     logo_url: str = ""
+    hero_image_url: str = ""
+    hero_judul: str = "Smartphone pilihan, dengan garansi toko."
+    hero_subjudul: str = "IMEI terverifikasi, kondisi diperiksa, harga transparan."
     pembayaran_aktif: List[MetodePembayaranConfig] = Field(default_factory=list)
     pengiriman_aktif: List[MetodePengirimanConfig] = Field(default_factory=list)
 
@@ -58,6 +61,9 @@ class SettingsAdmin(BaseModel):
     alamat_toko: str = ""
     email_toko: str = ""
     logo_url: str = ""
+    hero_image_url: str = ""
+    hero_judul: str = "Smartphone pilihan, dengan garansi toko."
+    hero_subjudul: str = "IMEI terverifikasi, kondisi diperiksa, harga transparan."
     pembayaran: List[MetodePembayaranConfig] = Field(default_factory=list)
     pengiriman: List[MetodePengirimanConfig] = Field(default_factory=list)
 
@@ -69,6 +75,9 @@ class SettingsUpdate(BaseModel):
     alamat_toko: Optional[str] = None
     email_toko: Optional[str] = None
     logo_url: Optional[str] = None
+    hero_image_url: Optional[str] = None
+    hero_judul: Optional[str] = None
+    hero_subjudul: Optional[str] = None
     pembayaran: Optional[List[MetodePembayaranConfig]] = None
     pengiriman: Optional[List[MetodePengirimanConfig]] = None
 
