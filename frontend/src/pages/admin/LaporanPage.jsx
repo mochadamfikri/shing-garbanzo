@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { api, API_BASE, formatApiErrorDetail } from "@/lib/api";
+import { api, formatApiErrorDetail } from "@/lib/api";
+import {downloadCsv} from "@/lib/download";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,10 +115,13 @@ export default function LaporanPage() {
     setStart(toIso(s)); setEnd(toIso(e));
   };
 
-  const exportCsv = (jenis) => {
-    const url = `${API_BASE}/api/reports/export?jenis=${jenis}&start=${start}&end=${end}`;
-    window.open(url, "_blank");
-    toast.info(`Mengunduh ${jenis}.csv`);
+  const exportCsv = async (jenis) => {
+    try {
+      await downloadCsv(`/reports/export?jenis=${encodeURIComponent(jenis)}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`, `${jenis}_${start}_${end}.csv`);
+      toast.success(`Laporan ${jenis} berhasil disiapkan untuk diunduh`);
+    } catch(e) {
+      toast.error("Unduhan gagal: " + (e?.response?.status===401?"Silakan login ulang":e.message||"Coba lagi"));
+    }
   };
 
   const chartData = useMemo(() => {
