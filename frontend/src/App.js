@@ -20,6 +20,8 @@ import KatalogPage from "@/pages/KatalogPage";
 import ProdukDetailPage from "@/pages/ProdukDetailPage";
 import KeranjangPage from "@/pages/KeranjangPage";
 import CustomerRegisterPage from "@/pages/CustomerRegisterPage";
+import VerifyEmailPage from "@/pages/VerifyEmailPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import AkunPage from "@/pages/AkunPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import PesananPage from "@/pages/PesananPage";
@@ -79,6 +81,8 @@ export default function App() {
 
               <Route path="/masuk" element={<LoginPage />} />
               <Route path="/daftar" element={<CustomerRegisterPage />} />
+              <Route path="/verifikasi-email" element={<VerifyEmailPage />} />
+              <Route path="/lupa-password" element={<ForgotPasswordPage />} />
 
               <Route
                 path="/admin"
