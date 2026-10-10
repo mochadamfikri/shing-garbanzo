@@ -9,6 +9,8 @@ from auth import (
 )
 from models import LoginRequest, RegisterRequest, UserPublic
 from utils import now_utc
+from routes_auth_security import issue_code
+from email_service import is_configured
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -23,6 +25,9 @@ async def login(payload: LoginRequest, response: Response):
     if not verify_password(payload.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Email atau kata sandi salah")
 
+    if user.get("email_verified") is False:
+        raise HTTPException(status_code=403, detail="Email belum diverifikasi. Masukkan kode verifikasi yang dikirim ke email.")
+
     token_version = user.get("token_version", 0)
     access = create_access_token(user["id"], user["email"], user["role"], token_version)
     refresh = create_refresh_token(user["id"], token_version)
@@ -30,15 +35,19 @@ async def login(payload: LoginRequest, response: Response):
     return UserPublic(**user)
 
 
-@router.post("/register", response_model=UserPublic)
-async def register(payload: RegisterRequest, response: Response):
+@router.post("/register", status_code=201)
+async def register(payload: RegisterRequest):
     """Registrasi pelanggan baru."""
     from server import db
 
     if payload.password != payload.konfirmasi_password:
         raise HTTPException(status_code=400, detail="Konfirmasi kata sandi tidak sama")
-    if len(payload.password) < 6:
-        raise HTTPException(status_code=400, detail="Kata sandi minimal 6 karakter")
+    if len(payload.password) < 8:
+        raise HTTPException(status_code=400, detail="Kata sandi minimal 8 karakter")
+    if not payload.nama.strip() or not payload.telepon.strip():
+        raise HTTPException(status_code=400, detail="Nama dan telepon wajib diisi")
+    if not is_configured():
+        raise HTTPException(status_code=503, detail="SMTP belum dikonfigurasi, pendaftaran belum tersedia")
 
     email = payload.email.lower().strip()
     if await db.users.find_one({"email": email}):
@@ -61,16 +70,15 @@ async def register(payload: RegisterRequest, response: Response):
         "telepon": payload.telepon.strip(),
         "role": ROLE_PELANGGAN,
         "aktif": True,
+        "email_verified": False,
         "token_version": 0,
         "promo_consent": consent,
         "created_at": now_s,
     }
     await db.users.insert_one(user_doc)
 
-    access = create_access_token(user_doc["id"], user_doc["email"], user_doc["role"], 0)
-    refresh = create_refresh_token(user_doc["id"], 0)
-    set_auth_cookies(response, access, refresh)
-    return UserPublic(**user_doc)
+    await issue_code(email, "verify")
+    return {"message": "Registrasi berhasil. Cek kode verifikasi di email Anda.", "email": email, "requires_verification": True}
 
 
 @router.post("/logout")
