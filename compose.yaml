@@ -1,0 +1,46 @@
+name: toko-hp-v2
+services:
+  mongo:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks: [private]
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.backend
+    env_file:
+      - ./backend/.env
+    environment:
+      MONGO_URL: mongodb://mongo:27017/?replicaSet=rs0
+      DB_NAME: toko_hp_v2
+      STORAGE_BACKEND: local
+      STORAGE_LOCAL_DIR: /app/uploads
+      PUBLIC_UPLOAD_PREFIX: /api/uploads/files
+    depends_on:
+      - mongo
+    volumes:
+      - ./data/uploads:/app/uploads
+    restart: unless-stopped
+    networks: [private]
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.frontend
+    ports:
+      - "127.0.0.1:18080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks: [private]
+
+networks:
+  private:
+    driver: bridge
+
+volumes:
+  mongo_data:
