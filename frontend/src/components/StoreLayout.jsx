@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { useSettings } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, UserCircle2, LogIn, LogOut, Store, Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -15,6 +16,7 @@ const NAV = [
 export default function StoreLayout() {
   const { user, logout } = useAuth();
   const { cart } = useCart();
+  const {settings} = useSettings();
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
   const isCustomer = user?.role === "pelanggan";
@@ -27,8 +29,8 @@ export default function StoreLayout() {
       <header className="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-slate-100">
         <div className="max-w-6xl mx-auto px-4 md:px-5 h-14 flex items-center justify-between gap-4">
           <Link to="/" className="font-heading font-bold text-lg flex items-center gap-2" data-testid="store-logo">
-            <span className="w-7 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center text-xs">TH</span>
-            Toko HP
+            {settings?.logo_url?<img src={settings.logo_url} alt="Logo toko" className="w-8 h-8 rounded-md object-contain" />:<span className="w-7 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center text-xs">TH</span>}
+            {settings?.nama_toko||"Toko HP"}
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             {NAV.map((n) => (
@@ -148,7 +150,7 @@ export default function StoreLayout() {
         </div>
         <div className="max-w-6xl mx-auto px-5 pt-6 mt-6 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
           <span>© {new Date().getFullYear()} Toko HP</span>
-          <span>Fase 2 · Katalog & Registrasi aktif</span>
+          <span>Belanja smartphone dengan nyaman dan aman</span>
         </div>
       </footer>
     </div>
