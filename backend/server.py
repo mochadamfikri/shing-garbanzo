@@ -51,6 +51,7 @@ from routes_settings import router as settings_router
 from routes_orders import router as orders_router
 from routes_reports import router as reports_router
 from routes_expenses import router as expenses_router
+from routes_pos import router as pos_router
 from routes_payments import router as payments_router
 
 app.include_router(auth_router)
@@ -63,6 +64,7 @@ app.include_router(settings_router)
 app.include_router(orders_router)
 app.include_router(reports_router)
 app.include_router(expenses_router)
+app.include_router(pos_router)
 app.include_router(payments_router)
 
 # Logging
@@ -106,12 +108,17 @@ async def on_startup():
     await db.settings.create_index("id", unique=True)
     await db.expenses.create_index("id", unique=True)
     await db.expenses.create_index("tanggal")
+    await db.pos_sales.create_index("id", unique=True)
+    await db.pos_sales.create_index("idempotency_key", unique=True)
+    await db.pos_sales.create_index("tanggal_jual")
     await db.webhook_events.create_index("event_id", unique=True)
 
     owner_email = os.environ.get("OWNER_EMAIL", "owner@tokohp.id").lower()
-    owner_password = os.environ.get("OWNER_PASSWORD", "Admin@12345")
+    owner_password = os.environ.get("OWNER_PASSWORD")
     existing = await db.users.find_one({"email": owner_email})
     if existing is None:
+        if not owner_password:
+            raise RuntimeError("OWNER_PASSWORD wajib ditentukan sebelum membuat Owner")
         await db.users.insert_one({
             "id": str(uuid.uuid4()),
             "email": owner_email,
@@ -124,12 +131,8 @@ async def on_startup():
         })
         logger.info("Seed Owner dibuat: %s", owner_email)
     else:
-        if not verify_password(owner_password, existing.get("password_hash", "")):
-            await db.users.update_one(
-                {"email": owner_email},
-                {"$set": {"password_hash": hash_password(owner_password)}},
-            )
-            logger.info("Password Owner disinkronkan dari .env")
+        # Akun yang sudah ada tidak direset saat proses restart.
+        pass
 
 
 @app.on_event("shutdown")
