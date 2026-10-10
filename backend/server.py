@@ -52,6 +52,7 @@ from routes_orders import router as orders_router
 from routes_reports import router as reports_router
 from routes_expenses import router as expenses_router
 from routes_pos import router as pos_router
+from routes_reports_v2 import router as reports_v2_router
 from routes_payments import router as payments_router
 
 app.include_router(auth_router)
@@ -65,6 +66,7 @@ app.include_router(orders_router)
 app.include_router(reports_router)
 app.include_router(expenses_router)
 app.include_router(pos_router)
+app.include_router(reports_v2_router)
 app.include_router(payments_router)
 
 # Logging
