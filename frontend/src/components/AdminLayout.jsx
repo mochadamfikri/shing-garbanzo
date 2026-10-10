@@ -16,6 +16,7 @@ const NAV_ALL = [
   { to: "/admin/inventaris", label: "Inventaris HP", icon: Smartphone, testId: "nav-inventaris" },
   { to: "/admin/penjualan", label: "Penjualan Kasir", icon: ScanLine, testId: "nav-pos" },
   { to: "/admin/analitik-v2", label: "Analitik V2", icon: BarChart3, testId: "nav-analitik-v2", roles:["owner","admin"] },
+  { to: "/admin/analitik-user", label: "Analitik User", icon: LayoutDashboard, testId: "nav-analitik-user", roles:["owner","admin"] },
   { to: "/admin/pesanan", label: "Pesanan", icon: ShoppingCart, testId: "nav-pesanan" },
   { to: "/admin/pembayaran-qris", label: "Pembayaran QRIS", icon: QrCode, testId: "nav-pembayaran-qris" },
   { to: "/admin/laporan", label: "Laporan", icon: BarChart3, testId: "nav-laporan", roles: ["owner", "admin"] },
