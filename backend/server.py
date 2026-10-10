@@ -42,6 +42,7 @@ app.mount("/api/uploads/files", StaticFiles(directory=upload_dir), name="uploads
 
 # Routers
 from routes_auth import router as auth_router
+from routes_auth_security import router as auth_security_router
 from routes_inventory import router as inventory_router
 from routes_uploads import router as uploads_router
 from routes_dashboard import router as dashboard_router
@@ -56,6 +57,7 @@ from routes_reports_v2 import router as reports_v2_router
 from routes_payments import router as payments_router
 
 app.include_router(auth_router)
+app.include_router(auth_security_router)
 app.include_router(inventory_router)
 app.include_router(uploads_router)
 app.include_router(dashboard_router)
@@ -93,6 +95,8 @@ async def health():
 @app.on_event("startup")
 async def on_startup():
     await db.users.create_index("email", unique=True)
+    await db.auth_codes.create_index([("email", 1), ("purpose", 1)], unique=True)
+    await db.auth_codes.create_index("expires_at", expireAfterSeconds=0)
     await db.users.create_index("id", unique=True)
     await db.units.create_index("id", unique=True)
     await db.units.create_index("imei_1")
