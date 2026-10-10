@@ -9,10 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, Trash2, Save } from "lucide-react";
+import { useSettings } from "@/lib/settings";
 
 export default function PengaturanPage() {
   const [s, setS] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState("");
+  const { refresh } = useSettings();
+  const uploadImage = async (file, field) => {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) return toast.error("Foto harus JPG/PNG/WEBP maksimal 10 MB");
+    const body = new FormData();body.append("file", file);
+    setUploading(field);
+    try { const { data } = await api.post("/uploads/image", body); setS(v=>({...v,[field]:data.url}));toast.success("Foto berhasil diunggah. Klik Simpan agar dipakai di toko."); }
+    catch(e) {toast.error(formatApiErrorDetail(e?.response?.data?.detail)||"Gagal upload foto");}
+    finally {setUploading("");}
+  };
 
   const load = () => api.get("/settings").then((r) => setS(r.data)).catch(() => toast.error("Gagal memuat"));
   useEffect(() => { load(); }, []);
@@ -23,6 +35,7 @@ export default function PengaturanPage() {
       const { data } = await api.patch("/settings", patch);
       setS(data);
       toast.success("Pengaturan disimpan");
+      await refresh();
     } catch (e) {
       toast.error(formatApiErrorDetail(e?.response?.data?.detail) || "Gagal");
     } finally {
@@ -78,13 +91,18 @@ export default function PengaturanPage() {
               <div><Label>Nomor WhatsApp (format: 628xxx)</Label><Input value={s.whatsapp_number || ""} onChange={(e) => setS({ ...s, whatsapp_number: e.target.value })} data-testid="s-wa-number" /></div>
               <div><Label>Email toko</Label><Input value={s.email_toko || ""} onChange={(e) => setS({ ...s, email_toko: e.target.value })} data-testid="s-email" /></div>
               <div><Label>Logo URL</Label><Input value={s.logo_url || ""} onChange={(e) => setS({ ...s, logo_url: e.target.value })} /></div>
+              <div><Label>Foto header toko (logo, ideal 400×400)</Label><Input type="file" accept="image/png,image/jpeg,image/webp" disabled={!!uploading} onChange={e=>uploadImage(e.target.files?.[0],"logo_url")} />{s.logo_url&&<img src={s.logo_url} alt="Preview logo toko" className="h-16 w-16 mt-2 object-contain rounded-md border" />}</div>
+              <div><Label>Foto banner smartphone (ideal 1200×1500)</Label><Input type="file" accept="image/png,image/jpeg,image/webp" disabled={!!uploading} onChange={e=>uploadImage(e.target.files?.[0],"hero_image_url")} />{s.hero_image_url&&<img src={s.hero_image_url} alt="Preview banner" className="h-24 w-20 mt-2 object-cover rounded-md border" />}</div>
+              <div className="md:col-span-2"><Label>URL gambar banner</Label><Input value={s.hero_image_url || ""} onChange={e=>setS({...s,hero_image_url:e.target.value})}/></div>
+              <div className="md:col-span-2"><Label>Judul halaman utama</Label><Input value={s.hero_judul || ""} onChange={e=>setS({...s,hero_judul:e.target.value})}/></div>
+              <div className="md:col-span-2"><Label>Deskripsi halaman utama</Label><Textarea rows={2} value={s.hero_subjudul || ""} onChange={e=>setS({...s,hero_subjudul:e.target.value})}/></div>
             </div>
             <div><Label>Alamat toko</Label><Textarea rows={2} value={s.alamat_toko || ""} onChange={(e) => setS({ ...s, alamat_toko: e.target.value })} /></div>
             <div><Label>Pesan default WhatsApp</Label><Input value={s.whatsapp_pesan_default || ""} onChange={(e) => setS({ ...s, whatsapp_pesan_default: e.target.value })} /></div>
             <div className="flex justify-end">
               <Button onClick={() => save({
                 nama_toko: s.nama_toko, whatsapp_number: s.whatsapp_number, email_toko: s.email_toko,
-                alamat_toko: s.alamat_toko, logo_url: s.logo_url, whatsapp_pesan_default: s.whatsapp_pesan_default,
+                alamat_toko: s.alamat_toko, logo_url: s.logo_url, hero_image_url: s.hero_image_url, hero_judul: s.hero_judul, hero_subjudul: s.hero_subjudul, whatsapp_pesan_default: s.whatsapp_pesan_default,
               })} disabled={saving} data-testid="btn-save-toko">
                 <Save className="w-4 h-4 mr-1.5" /> Simpan
               </Button>
