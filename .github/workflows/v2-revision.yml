@@ -1,0 +1,35 @@
+name: V2 Revision Checks
+on:
+  push:
+    branches:
+      - feature/v2-pos-mobile-analytics
+  workflow_dispatch:
+
+jobs:
+  backend-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Python syntax check
+        run: python -m compileall -q backend
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install JS dependencies
+        working-directory: frontend
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+      - name: Build React
+        working-directory: frontend
+        env:
+          CI: "false"
+          REACT_APP_BACKEND_URL: ""
+        run: npm run build
