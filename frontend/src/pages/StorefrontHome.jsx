@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
+import { useSettings } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import { ArrowRight, ShieldCheck, Store, Headphones, Smartphone } from "lucide-react";
 
 export default function StorefrontHome() {
+  const {settings} = useSettings();
   const [featured, setFeatured] = useState([]);
   const [brands, setBrands] = useState([]);
 
@@ -19,12 +21,9 @@ export default function StorefrontHome() {
       <section className="max-w-6xl mx-auto px-5 py-10 md:py-16 grid md:grid-cols-12 gap-8 items-center">
         <div className="md:col-span-7">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-500 mb-3">Toko Smartphone Terpercaya</p>
-          <h1 className="font-heading font-bold text-4xl md:text-6xl leading-[1.05] tracking-tight">
-            Smartphone resmi & inter, <br />
-            <span className="text-[#FF5722]">dengan garansi toko.</span>
-          </h1>
+          <h1 className="font-heading font-bold text-4xl md:text-6xl leading-[1.05] tracking-tight">{settings?.hero_judul||"Smartphone pilihan, dengan garansi toko."}</h1>
           <p className="mt-5 text-slate-600 max-w-xl text-base md:text-lg">
-            Pilih dari koleksi smartphone pilihan kami. IMEI terverifikasi, kondisi diperiksa, dan harga transparan.
+            {settings?.hero_subjudul||"Pilih smartphone terpercaya dengan kondisi diperiksa dan harga transparan."}
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link to="/katalog">
@@ -44,7 +43,7 @@ export default function StorefrontHome() {
         </div>
         <div className="md:col-span-5 relative">
           <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1777028773178-7c7e991646d7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHw0fHxwcmVtaXVtJTIwc21hcnRwaG9uZSUyMGNsb3NlJTIwdXB8ZW58MHx8fHwxNzkxNDgyNjQ2fDA&ixlib=rb-4.1.0&q=85"
+            <img src={settings?.hero_image_url||"https://images.unsplash.com/photo-1777028773178-7c7e991646d7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHw0fHxwcmVtaXVtJTIwc21hcnRwaG9uZSUyMGNsb3NlJTIwdXB8ZW58MHx8fHwxNzkxNDgyNjQ2fDA&ixlib=rb-4.1.0&q=85"}
                  alt="Smartphone" className="w-full h-full object-cover" />
           </div>
         </div>
