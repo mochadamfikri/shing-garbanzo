@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Trash2, Star, Pencil } from "lucide-react";
+import WilayahSelector from "@/components/WilayahSelector";
 
 const EMPTY_ADDR = {
   nama_penerima: "", telepon_penerima: "",
@@ -27,13 +28,11 @@ function AddressForm({ initial, onSubmit, onCancel }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><Label>Nama penerima</Label><Input value={v.nama_penerima} onChange={(e) => set("nama_penerima", e.target.value)} data-testid="addr-nama" /></div>
         <div><Label>Telepon penerima</Label><Input value={v.telepon_penerima} onChange={(e) => set("telepon_penerima", e.target.value)} data-testid="addr-telepon" /></div>
-        <div><Label>Provinsi</Label><Input value={v.provinsi} onChange={(e) => set("provinsi", e.target.value)} data-testid="addr-provinsi" /></div>
-        <div><Label>Kabupaten/Kota</Label><Input value={v.kabupaten} onChange={(e) => set("kabupaten", e.target.value)} data-testid="addr-kabupaten" /></div>
-        <div><Label>Kecamatan</Label><Input value={v.kecamatan} onChange={(e) => set("kecamatan", e.target.value)} data-testid="addr-kecamatan" /></div>
-        <div><Label>Kelurahan/Desa</Label><Input value={v.kelurahan} onChange={(e) => set("kelurahan", e.target.value)} data-testid="addr-kelurahan" /></div>
+
         <div><Label>Kode pos</Label><Input value={v.kode_pos} onChange={(e) => set("kode_pos", e.target.value)} data-testid="addr-kodepos" /></div>
         <div><Label>No rumah/gedung</Label><Input value={v.nomor_rumah} onChange={(e) => set("nomor_rumah", e.target.value)} data-testid="addr-nomor" /></div>
       </div>
+      <div className="mt-4"><WilayahSelector value={v} onChange={patch => setV(current => ({...current,...patch}))} /></div>
       <div className="mt-3"><Label>Alamat lengkap</Label><Textarea rows={2} value={v.alamat_lengkap} onChange={(e) => set("alamat_lengkap", e.target.value)} data-testid="addr-alamat" /></div>
       <div className="mt-3"><Label>Patokan / catatan (opsional)</Label><Input value={v.patokan} onChange={(e) => set("patokan", e.target.value)} data-testid="addr-patokan" /></div>
       <div className="mt-3 flex items-center gap-2">
@@ -42,7 +41,7 @@ function AddressForm({ initial, onSubmit, onCancel }) {
       </div>
       <div className="mt-5 flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel} data-testid="btn-addr-cancel">Batal</Button>
-        <Button type="button" onClick={() => onSubmit(v)} data-testid="btn-addr-save">Simpan</Button>
+        <Button type="button" onClick={() => { if(!v.provinsi||!v.kabupaten||!v.kecamatan||!v.kelurahan||!v.alamat_lengkap.trim()||!v.nama_penerima.trim()||!v.telepon_penerima.trim()) return toast.error("Lengkapi penerima, wilayah, dan alamat"); onSubmit(v); }} data-testid="btn-addr-save">Simpan</Button>
       </div>
     </Card>
   );
