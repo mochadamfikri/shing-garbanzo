@@ -96,13 +96,18 @@ export default function PengaturanPage() {
               <div className="md:col-span-2"><Label>URL gambar banner</Label><Input value={s.hero_image_url || ""} onChange={e=>setS({...s,hero_image_url:e.target.value})}/></div>
               <div className="md:col-span-2"><Label>Judul halaman utama</Label><Input value={s.hero_judul || ""} onChange={e=>setS({...s,hero_judul:e.target.value})}/></div>
               <div className="md:col-span-2"><Label>Deskripsi halaman utama</Label><Textarea rows={2} value={s.hero_subjudul || ""} onChange={e=>setS({...s,hero_subjudul:e.target.value})}/></div>
+              <div className="md:col-span-2 border-t pt-4 mt-2 space-y-3">
+                <div><Label>Deskripsi footer (bagian bawah website)</Label><Textarea rows={3} maxLength={600} placeholder="Tentang toko, garansi, layanan..." value={s.footer_deskripsi ?? "Smartphone resmi & inter dengan garansi toko."} onChange={e=>setS({...s,footer_deskripsi:e.target.value})} data-testid="settings-footer-description"/><p className="text-xs text-slate-500 mt-1">Nama dan logo footer otomatis mengikuti identitas toko di atas.</p></div>
+                <div><Label>Tagline footer (baris paling bawah)</Label><Input maxLength={160} placeholder="Kalimat singkat tentang toko..." value={s.footer_tagline ?? "Belanja smartphone dengan nyaman dan aman"} onChange={e=>setS({...s,footer_tagline:e.target.value})} data-testid="settings-footer-tagline"/></div>
+                <div className="bg-slate-50 rounded-md border p-3 text-sm"><p className="font-bold">{s.nama_toko || "Toko HP"}</p><p className="text-slate-600 whitespace-pre-line mt-1">{s.footer_deskripsi ?? "Smartphone resmi & inter dengan garansi toko."}</p><p className="text-xs text-slate-500 mt-2">© {new Date().getFullYear()} {s.nama_toko || "Toko HP"} · {s.footer_tagline ?? "Belanja smartphone dengan nyaman dan aman"}</p></div>
+              </div>
             </div>
             <div><Label>Alamat toko</Label><Textarea rows={2} value={s.alamat_toko || ""} onChange={(e) => setS({ ...s, alamat_toko: e.target.value })} /></div>
             <div><Label>Pesan default WhatsApp</Label><Input value={s.whatsapp_pesan_default || ""} onChange={(e) => setS({ ...s, whatsapp_pesan_default: e.target.value })} /></div>
             <div className="flex justify-end">
               <Button onClick={() => save({
                 nama_toko: s.nama_toko, whatsapp_number: s.whatsapp_number, email_toko: s.email_toko,
-                alamat_toko: s.alamat_toko, logo_url: s.logo_url, hero_image_url: s.hero_image_url, hero_judul: s.hero_judul, hero_subjudul: s.hero_subjudul, whatsapp_pesan_default: s.whatsapp_pesan_default,
+                alamat_toko: s.alamat_toko, logo_url: s.logo_url, hero_image_url: s.hero_image_url, hero_judul: s.hero_judul, hero_subjudul: s.hero_subjudul, footer_deskripsi: s.footer_deskripsi ?? "Smartphone resmi & inter dengan garansi toko.", footer_tagline: s.footer_tagline ?? "Belanja smartphone dengan nyaman dan aman", whatsapp_pesan_default: s.whatsapp_pesan_default,
               })} disabled={saving} data-testid="btn-save-toko">
                 <Save className="w-4 h-4 mr-1.5" /> Simpan
               </Button>
