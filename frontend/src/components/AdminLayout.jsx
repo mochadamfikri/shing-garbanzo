@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { ScanLine } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { formatRupiah } from "@/lib/format";
@@ -12,6 +13,7 @@ import { useAuth as useAuthHook } from "@/lib/auth";
 const NAV_ALL = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, testId: "nav-dashboard" },
   { to: "/admin/inventaris", label: "Inventaris HP", icon: Smartphone, testId: "nav-inventaris" },
+  { to: "/admin/penjualan", label: "Penjualan Kasir", icon: ScanLine, testId: "nav-pos" },
   { to: "/admin/pesanan", label: "Pesanan", icon: ShoppingCart, testId: "nav-pesanan" },
   { to: "/admin/pembayaran-qris", label: "Pembayaran QRIS", icon: QrCode, testId: "nav-pembayaran-qris" },
   { to: "/admin/laporan", label: "Laporan", icon: BarChart3, testId: "nav-laporan", roles: ["owner", "admin"] },
@@ -150,9 +152,10 @@ export default function AdminLayout() {
           </nav>
         </aside>
 
-        <main className="flex-1 min-w-0 p-4 md:p-6">
+        <main className="flex-1 min-w-0 p-3 pb-24 md:p-6">
           <Outlet />
         </main>
+        <nav aria-label="Navigasi mobile" className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]"><div className="grid grid-cols-4 h-16">{[{to:"/admin",name:"Beranda",icon:LayoutDashboard,end:true},{to:"/admin/penjualan",name:"Kasir",icon:ScanLine},{to:"/admin/inventaris",name:"Inventaris",icon:Smartphone},{to:"/admin/pesanan",name:"Pesanan",icon:ShoppingCart}].map(n=><NavLink key={n.to} end={n.end} to={n.to} className={({isActive})=>cn("flex flex-col gap-1 items-center justify-center text-xs",isActive?"text-blue-700":"text-slate-500")}><n.icon className="h-5 w-5"/>{n.name}</NavLink>)}</div></nav>
       </div>
     </div>
   );
