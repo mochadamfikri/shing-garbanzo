@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import {useSettings} from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,7 @@ import { ShieldCheck, Store } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { settings } = useSettings();
   const nav = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
@@ -47,8 +49,8 @@ export default function LoginPage() {
              style={{ backgroundImage: "radial-gradient(circle at 20% 20%, #0052FF 0%, transparent 40%), radial-gradient(circle at 80% 80%, #FF5722 0%, transparent 35%)" }} />
         <div className="relative z-10 flex flex-col justify-between w-full">
           <Link to="/" className="flex items-center gap-2 font-heading font-bold text-xl">
-            <span className="w-8 h-8 rounded-md bg-[#0052FF] flex items-center justify-center text-sm">TH</span>
-            Toko HP
+            {settings?.logo_url?<img src={settings.logo_url} alt="Logo toko" className="w-8 h-8 object-contain rounded-md"/>:<span className="w-8 h-8 rounded-md bg-[#0052FF] flex items-center justify-center text-sm">TH</span>}
+            {settings?.nama_toko||"Toko HP"}
           </Link>
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-3">Masuk</p>
