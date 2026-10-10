@@ -92,6 +92,10 @@ async def create_unit(payload: UnitHPCreate,
         ok2, msg2 = validate_imei(payload.imei_2)
         if not ok2:
             raise HTTPException(status_code=400, detail=f"IMEI 2: {msg2}")
+    if payload.status_stok == "TERJUAL":
+        raise HTTPException(status_code=400, detail="Penjualan harus melalui transaksi POS atau pesanan online")
+    if payload.imei_2 and payload.imei_1 == payload.imei_2:
+        raise HTTPException(status_code=400, detail="IMEI 1 dan IMEI 2 tidak boleh sama")
     # Cek duplikat
     dup_q = {"$or": [{"imei_1": payload.imei_1}, {"imei_2": payload.imei_1}]}
     if payload.imei_2:
@@ -167,6 +171,10 @@ async def update_unit(unit_id: str, payload: UnitHPUpdate,
 
     update_data = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if v is not None or k in ("imei_2", "kesehatan_baterai", "alasan_hold")}
 
+    if update_data.get("status_stok") == "TERJUAL" and existing.get("status_stok") != "TERJUAL":
+        raise HTTPException(status_code=409, detail="Gunakan menu POS untuk menjual unit")
+    if existing.get("status_stok") == "TERJUAL" and "status_stok" in update_data and update_data["status_stok"] != "TERJUAL":
+        raise HTTPException(status_code=409, detail="Status unit terjual hanya dapat diubah melalui retur")
     # Validasi
     if "jenis_perangkat" in update_data and update_data["jenis_perangkat"] not in JENIS_PERANGKAT:
         raise HTTPException(status_code=400, detail="Jenis perangkat tidak valid")
