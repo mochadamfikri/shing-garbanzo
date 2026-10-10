@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/lib/auth";
 import { api, formatApiErrorDetail } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,6 @@ const PROMO_TEXT = "Saya bersedia menerima informasi promosi, diskon, penawaran 
 
 export default function CustomerRegisterPage() {
   const nav = useNavigate();
-  const { refreshMe } = useAuth();
   const [form, setForm] = useState({
     nama: "", email: "", telepon: "", password: "", konfirmasi_password: "",
     setujui_promosi: false, saluran_whatsapp: false, saluran_email: false, saluran_sms: false,
@@ -31,8 +29,8 @@ export default function CustomerRegisterPage() {
       setErr("Konfirmasi kata sandi tidak sama");
       return;
     }
-    if (form.password.length < 6) {
-      setErr("Kata sandi minimal 6 karakter");
+    if (form.password.length < 8) {
+      setErr("Kata sandi minimal 8 karakter");
       return;
     }
     const saluran = [];
@@ -50,9 +48,8 @@ export default function CustomerRegisterPage() {
         saluran_promosi: saluran,
         versi_persetujuan: PROMO_VERSION,
       });
-      toast.success(`Selamat datang, ${form.nama}!`);
-      await refreshMe();
-      nav("/akun", { replace: true });
+      toast.success("Kode verifikasi telah dikirim ke email. Periksa juga folder spam.");
+      nav(`/verifikasi-email?email=${encodeURIComponent(form.email)}`, { replace: true });
     } catch (e) {
       setErr(formatApiErrorDetail(e?.response?.data?.detail) || e.message);
     } finally {
@@ -84,7 +81,7 @@ export default function CustomerRegisterPage() {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="password">Kata sandi</Label>
-              <Input id="password" type="password" required minLength={6} value={form.password} onChange={(e) => setField("password", e.target.value)} data-testid="reg-password" />
+              <Input id="password" type="password" required minLength={8} value={form.password} onChange={(e) => setField("password", e.target.value)} data-testid="reg-password" />
             </div>
             <div>
               <Label htmlFor="konfirmasi_password">Konfirmasi kata sandi</Label>
