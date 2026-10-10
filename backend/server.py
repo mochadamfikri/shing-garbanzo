@@ -43,6 +43,7 @@ app.mount("/api/uploads/files", StaticFiles(directory=upload_dir), name="uploads
 # Routers
 from routes_auth import router as auth_router
 from routes_auth_security import router as auth_security_router
+from routes_admin_users import router as admin_users_router
 from routes_inventory import router as inventory_router
 from routes_uploads import router as uploads_router
 from routes_dashboard import router as dashboard_router
@@ -58,6 +59,7 @@ from routes_payments import router as payments_router
 
 app.include_router(auth_router)
 app.include_router(auth_security_router)
+app.include_router(admin_users_router)
 app.include_router(inventory_router)
 app.include_router(uploads_router)
 app.include_router(dashboard_router)
