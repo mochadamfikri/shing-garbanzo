@@ -1,0 +1,6 @@
+# Add this site block to your existing Caddyfile, replacing the domain.
+# Do not overwrite other VPS sites.
+toko.domainlu.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:18080
+}
