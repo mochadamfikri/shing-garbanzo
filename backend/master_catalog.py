@@ -1,5 +1,5 @@
 """Comprehensive Master Device Catalog for Indonesian Smartphone Market.
-Brands: Apple, Samsung, Xiaomi, Oppo, Vivo, Realme, Infinix, Tecno, Poco, Google Pixel, Asus, Huawei.
+Brands: Apple, Samsung, Xiaomi, Oppo, Vivo, Realme, Infinix, Tecno, Poco, Google Pixel, Asus, Huawei, Sony, OnePlus, iQOO, Motorola, Nokia.
 """
 from typing import List, Dict, Any
 
@@ -124,8 +124,7 @@ COMPREHENSIVE_BRANDS = [
             {"name": "Pixel 9 Pro", "storages": ["128GB", "256GB", "512GB"], "colors": ["Obsidian", "Porcelain", "Hazel", "Rose Quartz"], "ram_options": ["16GB"]},
             {"name": "Pixel 9", "storages": ["128GB", "256GB"], "colors": ["Obsidian", "Porcelain", "Wintergreen", "Peony"], "ram_options": ["12GB"]},
             {"name": "Pixel 8 Pro", "storages": ["128GB", "256GB", "512GB"], "colors": ["Obsidian", "Porcelain", "Bay", "Mint"], "ram_options": ["12GB"]},
-            {"name": "Pixel 8", "storages": ["128GB", "256GB"], "colors": ["Obsidian", "Hazel", "Rose", "Mint"], "ram_options": ["8GB"]},
-            {"name": "Pixel 7 Pro", "storages": ["128GB", "256GB"], "colors": ["Obsidian", "Snow", "Hazel"], "ram_options": ["12GB"]}
+            {"name": "Pixel 8", "storages": ["128GB", "256GB"], "colors": ["Obsidian", "Hazel", "Rose", "Mint"], "ram_options": ["8GB"]}
         ]
     },
     {
@@ -143,11 +142,37 @@ COMPREHENSIVE_BRANDS = [
             {"name": "Pura 70 Pro", "storages": ["512GB"], "colors": ["Black", "White"], "ram_options": ["12GB"]},
             {"name": "Mate 60 Pro", "storages": ["256GB", "512GB", "1TB"], "colors": ["Black", "White", "Green", "Purple"], "ram_options": ["12GB"]}
         ]
+    },
+    {
+        "brand": "iQOO",
+        "models": [
+            {"name": "iQOO 12", "storages": ["512GB"], "colors": ["Alpha Black", "Legend White"], "ram_options": ["16GB"]},
+            {"name": "iQOO Z9 5G", "storages": ["128GB", "256GB"], "colors": ["Breeze Green", "Phantom Black"], "ram_options": ["8GB", "12GB"]},
+            {"name": "iQOO Z9x", "storages": ["128GB", "256GB"], "colors": ["Mystic Black", "Northern Green"], "ram_options": ["8GB"]}
+        ]
+    },
+    {
+        "brand": "Sony",
+        "models": [
+            {"name": "Xperia 1 VI", "storages": ["256GB", "512GB"], "colors": ["Black", "Platinum Silver", "Khaki Green"], "ram_options": ["12GB"]},
+            {"name": "Xperia 5 V", "storages": ["128GB", "256GB"], "colors": ["Black", "Platinum Silver", "Blue"], "ram_options": ["8GB"]}
+        ]
+    },
+    {
+        "brand": "OnePlus",
+        "models": [
+            {"name": "OnePlus 12", "storages": ["256GB", "512GB"], "colors": ["Silky Black", "Flowy Emerald"], "ram_options": ["12GB", "16GB"]},
+            {"name": "OnePlus Open", "storages": ["512GB"], "colors": ["Voyager Black", "Emerald Dusk"], "ram_options": ["16GB"]}
+        ]
     }
 ]
 
 async def init_master_catalog(db):
-    """Seed or update master catalog collection with comprehensive brand catalog."""
-    await db.master_catalog.delete_many({})
-    await db.master_catalog.insert_many(COMPREHENSIVE_BRANDS)
-    await db.master_catalog.create_index("brand", unique=True)
+    """Seed or update master catalog collection."""
+    # Always refresh to ensure all 15 brands exist
+    for b_data in COMPREHENSIVE_BRANDS:
+        await db.master_catalog.update_one(
+            {"brand": b_data["brand"]},
+            {"$set": b_data},
+            upsert=True
+        )

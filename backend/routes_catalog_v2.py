@@ -17,14 +17,6 @@ class NewModelRequest(BaseModel):
     ram_options: Optional[List[str]] = Field(default_factory=list)
 
 
-class NewVariantRequest(BaseModel):
-    brand: str
-    model_name: str
-    storage: Optional[str] = None
-    color: Optional[str] = None
-    ram: Optional[str] = None
-
-
 @router.get("")
 async def get_catalog(_user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))):
     from server import db
@@ -48,7 +40,6 @@ async def add_model(
     # Check if brand exists
     brand_doc = await db.master_catalog.find_one({"brand": {"$regex": f"^{re.escape(brand)}$", "$options": "i"}})
     if not brand_doc:
-        # Create new brand with this model
         new_brand = {
             "brand": brand,
             "models": [{
@@ -61,7 +52,6 @@ async def add_model(
         await db.master_catalog.insert_one(new_brand)
         return {"success": True, "message": f"Brand {brand} dan model {model_name} berhasil ditambahkan"}
 
-    # Brand exists: check if model already exists
     existing_models = [m["name"].lower() for m in brand_doc.get("models", [])]
     if model_name.lower() in existing_models:
         return {"success": True, "message": "Model sudah terdaftar"}
