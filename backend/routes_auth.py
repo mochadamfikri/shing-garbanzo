@@ -32,6 +32,7 @@ async def login(payload: LoginRequest, response: Response):
     access = create_access_token(user["id"], user["email"], user["role"], token_version)
     refresh = create_refresh_token(user["id"], token_version)
     set_auth_cookies(response, access, refresh)
+    response.headers["x-access-token"] = access
     return UserPublic(**user)
 
 

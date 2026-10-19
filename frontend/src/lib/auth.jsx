@@ -26,12 +26,9 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      // Minta token di body response selain cookie (via header)
       const { data, headers } = await api.post("/auth/login", { email, password });
-      // Ambil access_token dari cookies document jika ada
-      const tok = headers["x-access-token"];
+      const tok = headers["x-access-token"] || headers["X-Access-Token"];
       if (tok) setBearer(tok);
-      // fetch /me untuk memastikan
       const me = await refreshMe();
       return me || data;
     } catch (e) {

@@ -32,7 +32,11 @@ else:
     cors_kwargs = {"allow_origins": [o.strip() for o in origins_env.split(",") if o.strip()], "allow_credentials": True}
 
 app.add_middleware(
-    CORSMiddleware, allow_methods=["*"], allow_headers=["*"], **cors_kwargs,
+    CORSMiddleware,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["x-access-token", "X-Access-Token"],
+    **cors_kwargs,
 )
 
 # Static uploads - mount pada sub-path agar tidak bentrok dengan POST /api/uploads/*
