@@ -29,12 +29,7 @@ export default function LoginPage() {
     try {
       const u = await login(email, password);
       toast.success(`Selamat datang, ${u.nama || u.email}`);
-      // Routing berdasarkan role
-      let dest;
-      if (redirectParam) dest = redirectParam;
-      else if (u.role === "pelanggan") dest = "/akun";
-      else dest = "/admin";
-      nav(dest, { replace: true });
+      nav("/admin", { replace: true });
     } catch (err) {
       setError(err.message || "Gagal masuk");
     } finally {

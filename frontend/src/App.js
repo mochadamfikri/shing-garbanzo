@@ -17,9 +17,25 @@ import PengaturanPage from "@/pages/admin/PengaturanPage";
 import LaporanPage from "@/pages/admin/LaporanPage";
 import PosPage from "@/pages/admin/PosPage";
 import ImeiCheckPage from "@/pages/admin/ImeiCheckPage";
+import { useAuth } from "@/lib/auth";
 
 const STAFF = ["owner", "admin", "staf"];
 const FINANCE = ["owner", "admin"];
+
+function RootHandler() {
+  const { user, bootstrapped } = useAuth();
+  if (!bootstrapped) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-500">
+        Memuat...
+      </div>
+    );
+  }
+  if (!user) {
+    return <LoginPage />;
+  }
+  return <Navigate to="/admin" replace />;
+}
 
 export default function App() {
   return (
@@ -29,9 +45,10 @@ export default function App() {
           <BrowserRouter>
             <Toaster position="top-right" richColors />
             <Routes>
-              {/* Root redirect to admin */}
-              <Route path="/" element={<Navigate to="/admin" replace />} />
-              <Route path="/masuk" element={<LoginPage />} />
+              {/* Root "/" langsung render LoginPage jika belum login, atau Dashboard jika sudah login */}
+              <Route path="/" element={<RootHandler />} />
+              <Route path="/masuk" element={<RootHandler />} />
+              <Route path="/login" element={<RootHandler />} />
 
               {/* Admin Protected Routes */}
               <Route
@@ -67,8 +84,8 @@ export default function App() {
                 />
               </Route>
 
-              {/* Fallback all to admin */}
-              <Route path="*" element={<Navigate to="/admin" replace />} />
+              {/* Fallback all to root */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
         </SettingsProvider>
