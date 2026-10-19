@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  ScanLine
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "react-router-dom";
