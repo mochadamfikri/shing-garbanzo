@@ -1,0 +1,2641 @@
+{
+  "metadata": {
+    "scope": "2015-2026",
+    "updated_at": "2026-10-20",
+    "default_brand": "Apple",
+    "status": "curated_seed_not_exhaustive",
+    "note": "review region and model existence before enabling import; no variant/storage autofill"
+  },
+  "brands": [
+    {
+      "brand": "Apple",
+      "is_default": true,
+      "models": [
+        {
+          "name": "iPhone 6s",
+          "year": 2015
+        },
+        {
+          "name": "iPhone 6s Plus",
+          "year": 2015
+        },
+        {
+          "name": "iPhone SE (1st generation)",
+          "year": 2016
+        },
+        {
+          "name": "iPhone 7",
+          "year": 2016
+        },
+        {
+          "name": "iPhone 7 Plus",
+          "year": 2016
+        },
+        {
+          "name": "iPhone 8",
+          "year": 2017
+        },
+        {
+          "name": "iPhone 8 Plus",
+          "year": 2017
+        },
+        {
+          "name": "iPhone X",
+          "year": 2017
+        },
+        {
+          "name": "iPhone XR",
+          "year": 2018
+        },
+        {
+          "name": "iPhone XS",
+          "year": 2018
+        },
+        {
+          "name": "iPhone XS Max",
+          "year": 2018
+        },
+        {
+          "name": "iPhone 11",
+          "year": 2019
+        },
+        {
+          "name": "iPhone 11 Pro",
+          "year": 2019
+        },
+        {
+          "name": "iPhone 11 Pro Max",
+          "year": 2019
+        },
+        {
+          "name": "iPhone SE (2nd generation)",
+          "year": 2020
+        },
+        {
+          "name": "iPhone 12",
+          "year": 2020
+        },
+        {
+          "name": "iPhone 12 mini",
+          "year": 2020
+        },
+        {
+          "name": "iPhone 12 Pro",
+          "year": 2020
+        },
+        {
+          "name": "iPhone 12 Pro Max",
+          "year": 2020
+        },
+        {
+          "name": "iPhone 13",
+          "year": 2021
+        },
+        {
+          "name": "iPhone 13 mini",
+          "year": 2021
+        },
+        {
+          "name": "iPhone 13 Pro",
+          "year": 2021
+        },
+        {
+          "name": "iPhone 13 Pro Max",
+          "year": 2021
+        },
+        {
+          "name": "iPhone SE (3rd generation)",
+          "year": 2022
+        },
+        {
+          "name": "iPhone 14",
+          "year": 2022
+        },
+        {
+          "name": "iPhone 14 Plus",
+          "year": 2022
+        },
+        {
+          "name": "iPhone 14 Pro",
+          "year": 2022
+        },
+        {
+          "name": "iPhone 14 Pro Max",
+          "year": 2022
+        },
+        {
+          "name": "iPhone 15",
+          "year": 2023
+        },
+        {
+          "name": "iPhone 15 Plus",
+          "year": 2023
+        },
+        {
+          "name": "iPhone 15 Pro",
+          "year": 2023
+        },
+        {
+          "name": "iPhone 15 Pro Max",
+          "year": 2023
+        },
+        {
+          "name": "iPhone 16",
+          "year": 2024
+        },
+        {
+          "name": "iPhone 16 Plus",
+          "year": 2024
+        },
+        {
+          "name": "iPhone 16 Pro",
+          "year": 2024
+        },
+        {
+          "name": "iPhone 16 Pro Max",
+          "year": 2024
+        },
+        {
+          "name": "iPhone 16e",
+          "year": 2025
+        },
+        {
+          "name": "iPhone 17",
+          "year": 2025
+        },
+        {
+          "name": "iPhone 17 Pro",
+          "year": 2025
+        },
+        {
+          "name": "iPhone 17 Pro Max",
+          "year": 2025
+        },
+        {
+          "name": "iPhone Air",
+          "year": 2025
+        },
+        {
+          "name": "iPhone 17e",
+          "year": 2026
+        },
+        {
+          "name": "iPhone 18 Pro",
+          "year": 2026
+        },
+        {
+          "name": "iPhone 18 Pro Max",
+          "year": 2026
+        }
+      ]
+    },
+    {
+      "brand": "Advan",
+      "is_default": false,
+      "models": [
+        {
+          "name": "G5"
+        },
+        {
+          "name": "G5 Plus"
+        },
+        {
+          "name": "G9"
+        },
+        {
+          "name": "G9 Pro"
+        },
+        {
+          "name": "Nasa"
+        },
+        {
+          "name": "Nasa Pro"
+        },
+        {
+          "name": "S5E NXT"
+        },
+        {
+          "name": "S6"
+        },
+        {
+          "name": "i5C"
+        },
+        {
+          "name": "i6A"
+        }
+      ]
+    },
+    {
+      "brand": "ASUS",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Zenfone 2"
+        },
+        {
+          "name": "Zenfone 3"
+        },
+        {
+          "name": "Zenfone 3 Max"
+        },
+        {
+          "name": "Zenfone 4"
+        },
+        {
+          "name": "Zenfone 4 Max"
+        },
+        {
+          "name": "Zenfone 5"
+        },
+        {
+          "name": "Zenfone 5Z"
+        },
+        {
+          "name": "Zenfone 6"
+        },
+        {
+          "name": "Zenfone 7"
+        },
+        {
+          "name": "Zenfone 7 Pro"
+        },
+        {
+          "name": "Zenfone 8"
+        },
+        {
+          "name": "Zenfone 8 Flip"
+        },
+        {
+          "name": "Zenfone 9"
+        },
+        {
+          "name": "Zenfone 10"
+        },
+        {
+          "name": "Zenfone 11 Ultra"
+        },
+        {
+          "name": "Zenfone 12 Ultra"
+        },
+        {
+          "name": "ROG Phone"
+        },
+        {
+          "name": "ROG Phone II"
+        },
+        {
+          "name": "ROG Phone 3"
+        },
+        {
+          "name": "ROG Phone 5"
+        },
+        {
+          "name": "ROG Phone 5s"
+        },
+        {
+          "name": "ROG Phone 6"
+        },
+        {
+          "name": "ROG Phone 7"
+        },
+        {
+          "name": "ROG Phone 8"
+        },
+        {
+          "name": "ROG Phone 9"
+        }
+      ]
+    },
+    {
+      "brand": "BlackBerry",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Priv"
+        },
+        {
+          "name": "DTEK50"
+        },
+        {
+          "name": "DTEK60"
+        },
+        {
+          "name": "KEYone"
+        },
+        {
+          "name": "KEY2"
+        },
+        {
+          "name": "KEY2 LE"
+        }
+      ]
+    },
+    {
+      "brand": "Google",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Pixel"
+        },
+        {
+          "name": "Pixel XL"
+        },
+        {
+          "name": "Pixel 2"
+        },
+        {
+          "name": "Pixel 2 XL"
+        },
+        {
+          "name": "Pixel 3"
+        },
+        {
+          "name": "Pixel 3 XL"
+        },
+        {
+          "name": "Pixel 3a"
+        },
+        {
+          "name": "Pixel 3a XL"
+        },
+        {
+          "name": "Pixel 4"
+        },
+        {
+          "name": "Pixel 4 XL"
+        },
+        {
+          "name": "Pixel 4a"
+        },
+        {
+          "name": "Pixel 4a (5G)"
+        },
+        {
+          "name": "Pixel 5"
+        },
+        {
+          "name": "Pixel 5a"
+        },
+        {
+          "name": "Pixel 6"
+        },
+        {
+          "name": "Pixel 6 Pro"
+        },
+        {
+          "name": "Pixel 6a"
+        },
+        {
+          "name": "Pixel 7"
+        },
+        {
+          "name": "Pixel 7 Pro"
+        },
+        {
+          "name": "Pixel 7a"
+        },
+        {
+          "name": "Pixel 8"
+        },
+        {
+          "name": "Pixel 8 Pro"
+        },
+        {
+          "name": "Pixel 8a"
+        },
+        {
+          "name": "Pixel 9"
+        },
+        {
+          "name": "Pixel 9 Pro"
+        },
+        {
+          "name": "Pixel 9 Pro XL"
+        },
+        {
+          "name": "Pixel 9 Pro Fold"
+        },
+        {
+          "name": "Pixel 9a"
+        },
+        {
+          "name": "Pixel 10"
+        },
+        {
+          "name": "Pixel 10 Pro"
+        },
+        {
+          "name": "Pixel 10 Pro XL"
+        },
+        {
+          "name": "Pixel 10 Pro Fold"
+        }
+      ]
+    },
+    {
+      "brand": "HMD",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Pulse"
+        },
+        {
+          "name": "Pulse+"
+        },
+        {
+          "name": "Pulse Pro"
+        },
+        {
+          "name": "Skyline"
+        },
+        {
+          "name": "Fusion"
+        },
+        {
+          "name": "Arc"
+        }
+      ]
+    },
+    {
+      "brand": "HONOR",
+      "is_default": false,
+      "models": [
+        {
+          "name": "HONOR 8"
+        },
+        {
+          "name": "HONOR 9"
+        },
+        {
+          "name": "HONOR 10"
+        },
+        {
+          "name": "HONOR 20"
+        },
+        {
+          "name": "HONOR 20 Pro"
+        },
+        {
+          "name": "HONOR 30"
+        },
+        {
+          "name": "HONOR 50"
+        },
+        {
+          "name": "HONOR 70"
+        },
+        {
+          "name": "HONOR 90"
+        },
+        {
+          "name": "HONOR 200"
+        },
+        {
+          "name": "HONOR 200 Pro"
+        },
+        {
+          "name": "HONOR 400"
+        },
+        {
+          "name": "HONOR 400 Pro"
+        },
+        {
+          "name": "Magic 5 Pro"
+        },
+        {
+          "name": "Magic 6 Pro"
+        },
+        {
+          "name": "Magic 7 Pro"
+        },
+        {
+          "name": "Magic 8 Pro"
+        },
+        {
+          "name": "Magic V2"
+        },
+        {
+          "name": "Magic V3"
+        },
+        {
+          "name": "X8"
+        },
+        {
+          "name": "X9a"
+        },
+        {
+          "name": "X9b"
+        },
+        {
+          "name": "X9c"
+        },
+        {
+          "name": "X9d"
+        }
+      ]
+    },
+    {
+      "brand": "Huawei",
+      "is_default": false,
+      "models": [
+        {
+          "name": "P8"
+        },
+        {
+          "name": "P9"
+        },
+        {
+          "name": "P10"
+        },
+        {
+          "name": "P20"
+        },
+        {
+          "name": "P20 Pro"
+        },
+        {
+          "name": "P30"
+        },
+        {
+          "name": "P30 Pro"
+        },
+        {
+          "name": "P40"
+        },
+        {
+          "name": "P40 Pro"
+        },
+        {
+          "name": "P50"
+        },
+        {
+          "name": "P50 Pro"
+        },
+        {
+          "name": "P60 Pro"
+        },
+        {
+          "name": "Pura 70"
+        },
+        {
+          "name": "Pura 70 Pro"
+        },
+        {
+          "name": "Pura 70 Ultra"
+        },
+        {
+          "name": "Pura 80"
+        },
+        {
+          "name": "Pura 80 Pro"
+        },
+        {
+          "name": "Pura 80 Ultra"
+        },
+        {
+          "name": "Mate 8"
+        },
+        {
+          "name": "Mate 9"
+        },
+        {
+          "name": "Mate 10"
+        },
+        {
+          "name": "Mate 20"
+        },
+        {
+          "name": "Mate 20 Pro"
+        },
+        {
+          "name": "Mate 30"
+        },
+        {
+          "name": "Mate 30 Pro"
+        },
+        {
+          "name": "Mate 40 Pro"
+        },
+        {
+          "name": "Mate 50 Pro"
+        },
+        {
+          "name": "Mate 60 Pro"
+        },
+        {
+          "name": "Mate 70 Pro"
+        },
+        {
+          "name": "nova 3"
+        },
+        {
+          "name": "nova 5T"
+        },
+        {
+          "name": "nova 7"
+        },
+        {
+          "name": "nova 9"
+        },
+        {
+          "name": "nova 10"
+        },
+        {
+          "name": "nova 11"
+        },
+        {
+          "name": "nova 12"
+        },
+        {
+          "name": "nova 13"
+        }
+      ]
+    },
+    {
+      "brand": "Infinix",
+      "is_default": false,
+      "models": [
+        {
+          "name": "HOT 10"
+        },
+        {
+          "name": "HOT 11"
+        },
+        {
+          "name": "HOT 12"
+        },
+        {
+          "name": "HOT 20"
+        },
+        {
+          "name": "HOT 30"
+        },
+        {
+          "name": "HOT 40"
+        },
+        {
+          "name": "HOT 50"
+        },
+        {
+          "name": "NOTE 7"
+        },
+        {
+          "name": "NOTE 8"
+        },
+        {
+          "name": "NOTE 10"
+        },
+        {
+          "name": "NOTE 11"
+        },
+        {
+          "name": "NOTE 12"
+        },
+        {
+          "name": "NOTE 30"
+        },
+        {
+          "name": "NOTE 40"
+        },
+        {
+          "name": "NOTE 50"
+        },
+        {
+          "name": "SMART 5"
+        },
+        {
+          "name": "SMART 6"
+        },
+        {
+          "name": "SMART 7"
+        },
+        {
+          "name": "SMART 8"
+        },
+        {
+          "name": "SMART 9"
+        },
+        {
+          "name": "SMART 10"
+        },
+        {
+          "name": "ZERO 8"
+        },
+        {
+          "name": "ZERO X Pro"
+        },
+        {
+          "name": "ZERO 20"
+        },
+        {
+          "name": "ZERO 30"
+        },
+        {
+          "name": "ZERO 40"
+        },
+        {
+          "name": "GT 10 Pro"
+        },
+        {
+          "name": "GT 20 Pro"
+        },
+        {
+          "name": "GT 30 Pro"
+        }
+      ]
+    },
+    {
+      "brand": "iQOO",
+      "is_default": false,
+      "models": [
+        {
+          "name": "iQOO 9"
+        },
+        {
+          "name": "iQOO 11"
+        },
+        {
+          "name": "iQOO 12"
+        },
+        {
+          "name": "iQOO 13"
+        },
+        {
+          "name": "iQOO 15"
+        },
+        {
+          "name": "Neo 7"
+        },
+        {
+          "name": "Neo 9 Pro"
+        },
+        {
+          "name": "Neo 10"
+        },
+        {
+          "name": "Z7"
+        },
+        {
+          "name": "Z7x"
+        },
+        {
+          "name": "Z9"
+        },
+        {
+          "name": "Z9x"
+        },
+        {
+          "name": "Z10"
+        },
+        {
+          "name": "Z10x"
+        },
+        {
+          "name": "Z11x"
+        }
+      ]
+    },
+    {
+      "brand": "itel",
+      "is_default": false,
+      "models": [
+        {
+          "name": "A60"
+        },
+        {
+          "name": "A70"
+        },
+        {
+          "name": "A80"
+        },
+        {
+          "name": "A90"
+        },
+        {
+          "name": "P40"
+        },
+        {
+          "name": "P55"
+        },
+        {
+          "name": "P65"
+        },
+        {
+          "name": "P70"
+        },
+        {
+          "name": "P80"
+        },
+        {
+          "name": "S23"
+        },
+        {
+          "name": "S24"
+        },
+        {
+          "name": "S25"
+        }
+      ]
+    },
+    {
+      "brand": "LG",
+      "is_default": false,
+      "models": [
+        {
+          "name": "G4"
+        },
+        {
+          "name": "G5"
+        },
+        {
+          "name": "G6"
+        },
+        {
+          "name": "G7 ThinQ"
+        },
+        {
+          "name": "G8 ThinQ"
+        },
+        {
+          "name": "V10"
+        },
+        {
+          "name": "V20"
+        },
+        {
+          "name": "V30"
+        },
+        {
+          "name": "V40 ThinQ"
+        },
+        {
+          "name": "V50 ThinQ"
+        },
+        {
+          "name": "V60 ThinQ"
+        },
+        {
+          "name": "Velvet"
+        },
+        {
+          "name": "Wing"
+        }
+      ]
+    },
+    {
+      "brand": "Motorola",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Moto G (3rd gen)"
+        },
+        {
+          "name": "Moto G4"
+        },
+        {
+          "name": "Moto G5"
+        },
+        {
+          "name": "Moto G6"
+        },
+        {
+          "name": "Moto G7"
+        },
+        {
+          "name": "Moto G8"
+        },
+        {
+          "name": "Moto G9"
+        },
+        {
+          "name": "Moto G10"
+        },
+        {
+          "name": "Moto G20"
+        },
+        {
+          "name": "Moto G30"
+        },
+        {
+          "name": "Moto G50"
+        },
+        {
+          "name": "Moto G60"
+        },
+        {
+          "name": "Moto G73"
+        },
+        {
+          "name": "Moto G84"
+        },
+        {
+          "name": "Moto G85"
+        },
+        {
+          "name": "Moto G86"
+        },
+        {
+          "name": "Edge 20"
+        },
+        {
+          "name": "Edge 30"
+        },
+        {
+          "name": "Edge 40"
+        },
+        {
+          "name": "Edge 50"
+        },
+        {
+          "name": "Edge 60"
+        },
+        {
+          "name": "Razr 40"
+        },
+        {
+          "name": "Razr 40 Ultra"
+        },
+        {
+          "name": "Razr 50"
+        },
+        {
+          "name": "Razr 50 Ultra"
+        },
+        {
+          "name": "Razr 60"
+        },
+        {
+          "name": "Razr 60 Ultra"
+        }
+      ]
+    },
+    {
+      "brand": "Nokia",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Nokia 2"
+        },
+        {
+          "name": "Nokia 3"
+        },
+        {
+          "name": "Nokia 5"
+        },
+        {
+          "name": "Nokia 6"
+        },
+        {
+          "name": "Nokia 7 Plus"
+        },
+        {
+          "name": "Nokia 8"
+        },
+        {
+          "name": "Nokia 8 Sirocco"
+        },
+        {
+          "name": "Nokia 8.1"
+        },
+        {
+          "name": "Nokia 9 PureView"
+        },
+        {
+          "name": "Nokia G10"
+        },
+        {
+          "name": "Nokia G20"
+        },
+        {
+          "name": "Nokia G21"
+        },
+        {
+          "name": "Nokia G22"
+        },
+        {
+          "name": "Nokia G42 5G"
+        },
+        {
+          "name": "Nokia X10"
+        },
+        {
+          "name": "Nokia X20"
+        },
+        {
+          "name": "Nokia X30"
+        },
+        {
+          "name": "Nokia XR20"
+        },
+        {
+          "name": "Nokia XR21"
+        }
+      ]
+    },
+    {
+      "brand": "Nothing",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Phone (1)"
+        },
+        {
+          "name": "Phone (2)"
+        },
+        {
+          "name": "Phone (2a)"
+        },
+        {
+          "name": "Phone (2a) Plus"
+        },
+        {
+          "name": "Phone (3a)"
+        },
+        {
+          "name": "Phone (3a) Pro"
+        },
+        {
+          "name": "Phone (3)"
+        }
+      ]
+    },
+    {
+      "brand": "OnePlus",
+      "is_default": false,
+      "models": [
+        {
+          "name": "OnePlus 2"
+        },
+        {
+          "name": "OnePlus 3"
+        },
+        {
+          "name": "OnePlus 3T"
+        },
+        {
+          "name": "OnePlus 5"
+        },
+        {
+          "name": "OnePlus 5T"
+        },
+        {
+          "name": "OnePlus 6"
+        },
+        {
+          "name": "OnePlus 6T"
+        },
+        {
+          "name": "OnePlus 7"
+        },
+        {
+          "name": "OnePlus 7 Pro"
+        },
+        {
+          "name": "OnePlus 7T"
+        },
+        {
+          "name": "OnePlus 7T Pro"
+        },
+        {
+          "name": "OnePlus 8"
+        },
+        {
+          "name": "OnePlus 8 Pro"
+        },
+        {
+          "name": "OnePlus 8T"
+        },
+        {
+          "name": "OnePlus 9"
+        },
+        {
+          "name": "OnePlus 9 Pro"
+        },
+        {
+          "name": "OnePlus 9R"
+        },
+        {
+          "name": "OnePlus 10 Pro"
+        },
+        {
+          "name": "OnePlus 10T"
+        },
+        {
+          "name": "OnePlus 11"
+        },
+        {
+          "name": "OnePlus 11R"
+        },
+        {
+          "name": "OnePlus 12"
+        },
+        {
+          "name": "OnePlus 12R"
+        },
+        {
+          "name": "OnePlus 13"
+        },
+        {
+          "name": "OnePlus 13R"
+        },
+        {
+          "name": "OnePlus 15"
+        },
+        {
+          "name": "Nord"
+        },
+        {
+          "name": "Nord 2"
+        },
+        {
+          "name": "Nord 2T"
+        },
+        {
+          "name": "Nord 3"
+        },
+        {
+          "name": "Nord 4"
+        },
+        {
+          "name": "Nord 5"
+        },
+        {
+          "name": "Nord CE 2"
+        },
+        {
+          "name": "Nord CE 3"
+        },
+        {
+          "name": "Nord CE 4"
+        }
+      ]
+    },
+    {
+      "brand": "OPPO",
+      "is_default": false,
+      "models": [
+        {
+          "name": "A33"
+        },
+        {
+          "name": "A37"
+        },
+        {
+          "name": "A39"
+        },
+        {
+          "name": "A57"
+        },
+        {
+          "name": "A71"
+        },
+        {
+          "name": "A83"
+        },
+        {
+          "name": "A3s"
+        },
+        {
+          "name": "A5s"
+        },
+        {
+          "name": "A9 2020"
+        },
+        {
+          "name": "A12"
+        },
+        {
+          "name": "A15"
+        },
+        {
+          "name": "A16"
+        },
+        {
+          "name": "A17"
+        },
+        {
+          "name": "A18"
+        },
+        {
+          "name": "A38"
+        },
+        {
+          "name": "A58"
+        },
+        {
+          "name": "A78"
+        },
+        {
+          "name": "A98 5G"
+        },
+        {
+          "name": "A6"
+        },
+        {
+          "name": "A6 Pro"
+        },
+        {
+          "name": "F1"
+        },
+        {
+          "name": "F1s"
+        },
+        {
+          "name": "F3"
+        },
+        {
+          "name": "F5"
+        },
+        {
+          "name": "F7"
+        },
+        {
+          "name": "F9"
+        },
+        {
+          "name": "F11"
+        },
+        {
+          "name": "F11 Pro"
+        },
+        {
+          "name": "Reno"
+        },
+        {
+          "name": "Reno 2"
+        },
+        {
+          "name": "Reno 3"
+        },
+        {
+          "name": "Reno 4"
+        },
+        {
+          "name": "Reno 5"
+        },
+        {
+          "name": "Reno 6"
+        },
+        {
+          "name": "Reno 7"
+        },
+        {
+          "name": "Reno 8"
+        },
+        {
+          "name": "Reno 8 T"
+        },
+        {
+          "name": "Reno 10"
+        },
+        {
+          "name": "Reno 10 Pro"
+        },
+        {
+          "name": "Reno 11"
+        },
+        {
+          "name": "Reno 11 Pro"
+        },
+        {
+          "name": "Reno 12"
+        },
+        {
+          "name": "Reno 12 Pro"
+        },
+        {
+          "name": "Reno 13"
+        },
+        {
+          "name": "Reno 13 F"
+        },
+        {
+          "name": "Reno 14"
+        },
+        {
+          "name": "Reno 14 Pro"
+        },
+        {
+          "name": "Reno 15"
+        },
+        {
+          "name": "Reno 15 F"
+        },
+        {
+          "name": "Reno 16"
+        },
+        {
+          "name": "Reno 16 Pro"
+        },
+        {
+          "name": "Find X"
+        },
+        {
+          "name": "Find X2"
+        },
+        {
+          "name": "Find X3 Pro"
+        },
+        {
+          "name": "Find X5 Pro"
+        },
+        {
+          "name": "Find X6 Pro"
+        },
+        {
+          "name": "Find X7 Ultra"
+        },
+        {
+          "name": "Find X8"
+        },
+        {
+          "name": "Find X8 Pro"
+        },
+        {
+          "name": "Find X9"
+        },
+        {
+          "name": "Find X9 Pro"
+        },
+        {
+          "name": "Find N2 Flip"
+        },
+        {
+          "name": "Find N3"
+        },
+        {
+          "name": "Find N3 Flip"
+        },
+        {
+          "name": "Find N5"
+        }
+      ]
+    },
+    {
+      "brand": "POCO",
+      "is_default": false,
+      "models": [
+        {
+          "name": "POCO F1"
+        },
+        {
+          "name": "POCO F2 Pro"
+        },
+        {
+          "name": "POCO F3"
+        },
+        {
+          "name": "POCO F4"
+        },
+        {
+          "name": "POCO F4 GT"
+        },
+        {
+          "name": "POCO F5"
+        },
+        {
+          "name": "POCO F5 Pro"
+        },
+        {
+          "name": "POCO F6"
+        },
+        {
+          "name": "POCO F6 Pro"
+        },
+        {
+          "name": "POCO F7"
+        },
+        {
+          "name": "POCO F7 Pro"
+        },
+        {
+          "name": "POCO F7 Ultra"
+        },
+        {
+          "name": "POCO X3"
+        },
+        {
+          "name": "POCO X3 Pro"
+        },
+        {
+          "name": "POCO X4 Pro 5G"
+        },
+        {
+          "name": "POCO X5"
+        },
+        {
+          "name": "POCO X5 Pro"
+        },
+        {
+          "name": "POCO X6"
+        },
+        {
+          "name": "POCO X6 Pro"
+        },
+        {
+          "name": "POCO X7"
+        },
+        {
+          "name": "POCO X7 Pro"
+        },
+        {
+          "name": "POCO M3"
+        },
+        {
+          "name": "POCO M4 Pro"
+        },
+        {
+          "name": "POCO M5"
+        },
+        {
+          "name": "POCO M6 Pro"
+        },
+        {
+          "name": "POCO M7"
+        },
+        {
+          "name": "POCO C40"
+        },
+        {
+          "name": "POCO C55"
+        },
+        {
+          "name": "POCO C65"
+        },
+        {
+          "name": "POCO C75"
+        }
+      ]
+    },
+    {
+      "brand": "realme",
+      "is_default": false,
+      "models": [
+        {
+          "name": "realme 2"
+        },
+        {
+          "name": "realme 3"
+        },
+        {
+          "name": "realme 5"
+        },
+        {
+          "name": "realme 6"
+        },
+        {
+          "name": "realme 7"
+        },
+        {
+          "name": "realme 8"
+        },
+        {
+          "name": "realme 9"
+        },
+        {
+          "name": "realme 10"
+        },
+        {
+          "name": "realme 11"
+        },
+        {
+          "name": "realme 12"
+        },
+        {
+          "name": "realme 13"
+        },
+        {
+          "name": "realme 14"
+        },
+        {
+          "name": "realme 15"
+        },
+        {
+          "name": "realme 16 Pro"
+        },
+        {
+          "name": "C1"
+        },
+        {
+          "name": "C2"
+        },
+        {
+          "name": "C3"
+        },
+        {
+          "name": "C11"
+        },
+        {
+          "name": "C15"
+        },
+        {
+          "name": "C21"
+        },
+        {
+          "name": "C25"
+        },
+        {
+          "name": "C31"
+        },
+        {
+          "name": "C33"
+        },
+        {
+          "name": "C35"
+        },
+        {
+          "name": "C51"
+        },
+        {
+          "name": "C53"
+        },
+        {
+          "name": "C55"
+        },
+        {
+          "name": "C61"
+        },
+        {
+          "name": "C63"
+        },
+        {
+          "name": "C65"
+        },
+        {
+          "name": "C67"
+        },
+        {
+          "name": "C75"
+        },
+        {
+          "name": "Narzo 20"
+        },
+        {
+          "name": "Narzo 30"
+        },
+        {
+          "name": "Narzo 50"
+        },
+        {
+          "name": "Narzo 60"
+        },
+        {
+          "name": "GT"
+        },
+        {
+          "name": "GT Master Edition"
+        },
+        {
+          "name": "GT 2 Pro"
+        },
+        {
+          "name": "GT Neo 3"
+        },
+        {
+          "name": "GT 5"
+        },
+        {
+          "name": "GT 6"
+        },
+        {
+          "name": "GT 7"
+        }
+      ]
+    },
+    {
+      "brand": "Redmi",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Redmi 2"
+        },
+        {
+          "name": "Redmi 3"
+        },
+        {
+          "name": "Redmi 3S"
+        },
+        {
+          "name": "Redmi 4"
+        },
+        {
+          "name": "Redmi 5"
+        },
+        {
+          "name": "Redmi 6"
+        },
+        {
+          "name": "Redmi 7"
+        },
+        {
+          "name": "Redmi 8"
+        },
+        {
+          "name": "Redmi 9"
+        },
+        {
+          "name": "Redmi 10"
+        },
+        {
+          "name": "Redmi 12"
+        },
+        {
+          "name": "Redmi 13"
+        },
+        {
+          "name": "Redmi 14C"
+        },
+        {
+          "name": "Redmi 15"
+        },
+        {
+          "name": "Redmi Note 2"
+        },
+        {
+          "name": "Redmi Note 3"
+        },
+        {
+          "name": "Redmi Note 4"
+        },
+        {
+          "name": "Redmi Note 5"
+        },
+        {
+          "name": "Redmi Note 6 Pro"
+        },
+        {
+          "name": "Redmi Note 7"
+        },
+        {
+          "name": "Redmi Note 8"
+        },
+        {
+          "name": "Redmi Note 8 Pro"
+        },
+        {
+          "name": "Redmi Note 9"
+        },
+        {
+          "name": "Redmi Note 9 Pro"
+        },
+        {
+          "name": "Redmi Note 10"
+        },
+        {
+          "name": "Redmi Note 10 Pro"
+        },
+        {
+          "name": "Redmi Note 11"
+        },
+        {
+          "name": "Redmi Note 11 Pro"
+        },
+        {
+          "name": "Redmi Note 12"
+        },
+        {
+          "name": "Redmi Note 12 Pro"
+        },
+        {
+          "name": "Redmi Note 13"
+        },
+        {
+          "name": "Redmi Note 13 Pro"
+        },
+        {
+          "name": "Redmi Note 14"
+        },
+        {
+          "name": "Redmi Note 14 Pro"
+        },
+        {
+          "name": "Redmi Note 15"
+        },
+        {
+          "name": "Redmi Note 15 Pro"
+        },
+        {
+          "name": "Redmi A1"
+        },
+        {
+          "name": "Redmi A2"
+        },
+        {
+          "name": "Redmi A3"
+        },
+        {
+          "name": "Redmi A5"
+        }
+      ]
+    },
+    {
+      "brand": "Samsung",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Galaxy S6"
+        },
+        {
+          "name": "Galaxy S6 edge"
+        },
+        {
+          "name": "Galaxy S6 edge+"
+        },
+        {
+          "name": "Galaxy S7"
+        },
+        {
+          "name": "Galaxy S7 edge"
+        },
+        {
+          "name": "Galaxy S8"
+        },
+        {
+          "name": "Galaxy S8+"
+        },
+        {
+          "name": "Galaxy S9"
+        },
+        {
+          "name": "Galaxy S9+"
+        },
+        {
+          "name": "Galaxy S10e"
+        },
+        {
+          "name": "Galaxy S10"
+        },
+        {
+          "name": "Galaxy S10+"
+        },
+        {
+          "name": "Galaxy S20"
+        },
+        {
+          "name": "Galaxy S20+"
+        },
+        {
+          "name": "Galaxy S20 Ultra"
+        },
+        {
+          "name": "Galaxy S20 FE"
+        },
+        {
+          "name": "Galaxy S21"
+        },
+        {
+          "name": "Galaxy S21+"
+        },
+        {
+          "name": "Galaxy S21 Ultra"
+        },
+        {
+          "name": "Galaxy S21 FE"
+        },
+        {
+          "name": "Galaxy S22"
+        },
+        {
+          "name": "Galaxy S22+"
+        },
+        {
+          "name": "Galaxy S22 Ultra"
+        },
+        {
+          "name": "Galaxy S23"
+        },
+        {
+          "name": "Galaxy S23+"
+        },
+        {
+          "name": "Galaxy S23 Ultra"
+        },
+        {
+          "name": "Galaxy S23 FE"
+        },
+        {
+          "name": "Galaxy S24"
+        },
+        {
+          "name": "Galaxy S24+"
+        },
+        {
+          "name": "Galaxy S24 Ultra"
+        },
+        {
+          "name": "Galaxy S24 FE"
+        },
+        {
+          "name": "Galaxy S25"
+        },
+        {
+          "name": "Galaxy S25+"
+        },
+        {
+          "name": "Galaxy S25 Ultra"
+        },
+        {
+          "name": "Galaxy S25 Edge"
+        },
+        {
+          "name": "Galaxy S25 FE"
+        },
+        {
+          "name": "Galaxy S26"
+        },
+        {
+          "name": "Galaxy S26+"
+        },
+        {
+          "name": "Galaxy S26 Ultra"
+        },
+        {
+          "name": "Galaxy Note5"
+        },
+        {
+          "name": "Galaxy Note8"
+        },
+        {
+          "name": "Galaxy Note9"
+        },
+        {
+          "name": "Galaxy Note10"
+        },
+        {
+          "name": "Galaxy Note10+"
+        },
+        {
+          "name": "Galaxy Note20"
+        },
+        {
+          "name": "Galaxy Note20 Ultra"
+        },
+        {
+          "name": "Galaxy Fold"
+        },
+        {
+          "name": "Galaxy Z Flip"
+        },
+        {
+          "name": "Galaxy Z Fold2"
+        },
+        {
+          "name": "Galaxy Z Flip3"
+        },
+        {
+          "name": "Galaxy Z Fold3"
+        },
+        {
+          "name": "Galaxy Z Flip4"
+        },
+        {
+          "name": "Galaxy Z Fold4"
+        },
+        {
+          "name": "Galaxy Z Flip5"
+        },
+        {
+          "name": "Galaxy Z Fold5"
+        },
+        {
+          "name": "Galaxy Z Flip6"
+        },
+        {
+          "name": "Galaxy Z Fold6"
+        },
+        {
+          "name": "Galaxy Z Flip7"
+        },
+        {
+          "name": "Galaxy Z Fold7"
+        },
+        {
+          "name": "Galaxy A5 (2016)"
+        },
+        {
+          "name": "Galaxy A7 (2017)"
+        },
+        {
+          "name": "Galaxy A8 (2018)"
+        },
+        {
+          "name": "Galaxy A9 (2018)"
+        },
+        {
+          "name": "Galaxy A10"
+        },
+        {
+          "name": "Galaxy A20"
+        },
+        {
+          "name": "Galaxy A30"
+        },
+        {
+          "name": "Galaxy A50"
+        },
+        {
+          "name": "Galaxy A70"
+        },
+        {
+          "name": "Galaxy A01"
+        },
+        {
+          "name": "Galaxy A11"
+        },
+        {
+          "name": "Galaxy A21s"
+        },
+        {
+          "name": "Galaxy A31"
+        },
+        {
+          "name": "Galaxy A51"
+        },
+        {
+          "name": "Galaxy A71"
+        },
+        {
+          "name": "Galaxy A02"
+        },
+        {
+          "name": "Galaxy A12"
+        },
+        {
+          "name": "Galaxy A22"
+        },
+        {
+          "name": "Galaxy A32"
+        },
+        {
+          "name": "Galaxy A52"
+        },
+        {
+          "name": "Galaxy A72"
+        },
+        {
+          "name": "Galaxy A03"
+        },
+        {
+          "name": "Galaxy A13"
+        },
+        {
+          "name": "Galaxy A23"
+        },
+        {
+          "name": "Galaxy A33"
+        },
+        {
+          "name": "Galaxy A53"
+        },
+        {
+          "name": "Galaxy A73"
+        },
+        {
+          "name": "Galaxy A04"
+        },
+        {
+          "name": "Galaxy A14"
+        },
+        {
+          "name": "Galaxy A24"
+        },
+        {
+          "name": "Galaxy A34"
+        },
+        {
+          "name": "Galaxy A54"
+        },
+        {
+          "name": "Galaxy A05"
+        },
+        {
+          "name": "Galaxy A15"
+        },
+        {
+          "name": "Galaxy A25"
+        },
+        {
+          "name": "Galaxy A35"
+        },
+        {
+          "name": "Galaxy A55"
+        },
+        {
+          "name": "Galaxy A06"
+        },
+        {
+          "name": "Galaxy A16"
+        },
+        {
+          "name": "Galaxy A26"
+        },
+        {
+          "name": "Galaxy A36"
+        },
+        {
+          "name": "Galaxy A56"
+        },
+        {
+          "name": "Galaxy A07"
+        },
+        {
+          "name": "Galaxy A17"
+        },
+        {
+          "name": "Galaxy A37"
+        },
+        {
+          "name": "Galaxy A57"
+        },
+        {
+          "name": "Galaxy J2"
+        },
+        {
+          "name": "Galaxy J5"
+        },
+        {
+          "name": "Galaxy J7"
+        },
+        {
+          "name": "Galaxy M10"
+        },
+        {
+          "name": "Galaxy M20"
+        },
+        {
+          "name": "Galaxy M30"
+        },
+        {
+          "name": "Galaxy M31"
+        },
+        {
+          "name": "Galaxy M32"
+        },
+        {
+          "name": "Galaxy M33"
+        },
+        {
+          "name": "Galaxy M34"
+        },
+        {
+          "name": "Galaxy M35"
+        },
+        {
+          "name": "Galaxy M55"
+        }
+      ]
+    },
+    {
+      "brand": "Sony",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Xperia Z5"
+        },
+        {
+          "name": "Xperia Z5 Compact"
+        },
+        {
+          "name": "Xperia X"
+        },
+        {
+          "name": "Xperia XZ"
+        },
+        {
+          "name": "Xperia XZ1"
+        },
+        {
+          "name": "Xperia XZ2"
+        },
+        {
+          "name": "Xperia XZ3"
+        },
+        {
+          "name": "Xperia 1"
+        },
+        {
+          "name": "Xperia 1 II"
+        },
+        {
+          "name": "Xperia 1 III"
+        },
+        {
+          "name": "Xperia 1 IV"
+        },
+        {
+          "name": "Xperia 1 V"
+        },
+        {
+          "name": "Xperia 1 VI"
+        },
+        {
+          "name": "Xperia 1 VII"
+        },
+        {
+          "name": "Xperia 5"
+        },
+        {
+          "name": "Xperia 5 II"
+        },
+        {
+          "name": "Xperia 5 III"
+        },
+        {
+          "name": "Xperia 5 IV"
+        },
+        {
+          "name": "Xperia 5 V"
+        },
+        {
+          "name": "Xperia 10"
+        },
+        {
+          "name": "Xperia 10 II"
+        },
+        {
+          "name": "Xperia 10 III"
+        },
+        {
+          "name": "Xperia 10 IV"
+        },
+        {
+          "name": "Xperia 10 V"
+        },
+        {
+          "name": "Xperia 10 VI"
+        }
+      ]
+    },
+    {
+      "brand": "TECNO",
+      "is_default": false,
+      "models": [
+        {
+          "name": "CAMON 15"
+        },
+        {
+          "name": "CAMON 16"
+        },
+        {
+          "name": "CAMON 17"
+        },
+        {
+          "name": "CAMON 18"
+        },
+        {
+          "name": "CAMON 19"
+        },
+        {
+          "name": "CAMON 20"
+        },
+        {
+          "name": "CAMON 20 Pro 5G"
+        },
+        {
+          "name": "CAMON 30"
+        },
+        {
+          "name": "CAMON 40"
+        },
+        {
+          "name": "CAMON 50 Pro 5G"
+        },
+        {
+          "name": "POVA 2"
+        },
+        {
+          "name": "POVA 3"
+        },
+        {
+          "name": "POVA 4"
+        },
+        {
+          "name": "POVA 5"
+        },
+        {
+          "name": "POVA 6"
+        },
+        {
+          "name": "POVA 7"
+        },
+        {
+          "name": "POVA 7 5G"
+        },
+        {
+          "name": "POVA 8 Pro 5G"
+        },
+        {
+          "name": "SPARK 7"
+        },
+        {
+          "name": "SPARK 8"
+        },
+        {
+          "name": "SPARK 9"
+        },
+        {
+          "name": "SPARK 10"
+        },
+        {
+          "name": "SPARK 20"
+        },
+        {
+          "name": "SPARK 30"
+        },
+        {
+          "name": "SPARK 30 Pro"
+        },
+        {
+          "name": "SPARK 40"
+        },
+        {
+          "name": "SPARK 50"
+        },
+        {
+          "name": "PHANTOM X"
+        },
+        {
+          "name": "PHANTOM X2"
+        },
+        {
+          "name": "PHANTOM V Fold"
+        },
+        {
+          "name": "PHANTOM V Flip"
+        }
+      ]
+    },
+    {
+      "brand": "vivo",
+      "is_default": false,
+      "models": [
+        {
+          "name": "V5"
+        },
+        {
+          "name": "V7"
+        },
+        {
+          "name": "V9"
+        },
+        {
+          "name": "V11"
+        },
+        {
+          "name": "V15"
+        },
+        {
+          "name": "V17"
+        },
+        {
+          "name": "V19"
+        },
+        {
+          "name": "V20"
+        },
+        {
+          "name": "V21"
+        },
+        {
+          "name": "V23"
+        },
+        {
+          "name": "V25"
+        },
+        {
+          "name": "V27"
+        },
+        {
+          "name": "V29"
+        },
+        {
+          "name": "V30"
+        },
+        {
+          "name": "V40"
+        },
+        {
+          "name": "V50"
+        },
+        {
+          "name": "V60"
+        },
+        {
+          "name": "V70"
+        },
+        {
+          "name": "V70 FE"
+        },
+        {
+          "name": "X50"
+        },
+        {
+          "name": "X50 Pro"
+        },
+        {
+          "name": "X60"
+        },
+        {
+          "name": "X60 Pro"
+        },
+        {
+          "name": "X70 Pro"
+        },
+        {
+          "name": "X80"
+        },
+        {
+          "name": "X80 Pro"
+        },
+        {
+          "name": "X90"
+        },
+        {
+          "name": "X90 Pro"
+        },
+        {
+          "name": "X100"
+        },
+        {
+          "name": "X100 Pro"
+        },
+        {
+          "name": "X200"
+        },
+        {
+          "name": "X200 Pro"
+        },
+        {
+          "name": "X300"
+        },
+        {
+          "name": "X300 Pro"
+        },
+        {
+          "name": "X300 Ultra"
+        },
+        {
+          "name": "X Fold5"
+        },
+        {
+          "name": "Y12"
+        },
+        {
+          "name": "Y15"
+        },
+        {
+          "name": "Y17"
+        },
+        {
+          "name": "Y20"
+        },
+        {
+          "name": "Y21"
+        },
+        {
+          "name": "Y22"
+        },
+        {
+          "name": "Y27"
+        },
+        {
+          "name": "Y28"
+        },
+        {
+          "name": "Y29"
+        },
+        {
+          "name": "Y30"
+        },
+        {
+          "name": "Y33s"
+        },
+        {
+          "name": "Y35"
+        },
+        {
+          "name": "Y36"
+        },
+        {
+          "name": "Y50"
+        },
+        {
+          "name": "Y51"
+        },
+        {
+          "name": "Y53"
+        },
+        {
+          "name": "Y55"
+        },
+        {
+          "name": "Y71"
+        },
+        {
+          "name": "Y81"
+        },
+        {
+          "name": "Y91"
+        },
+        {
+          "name": "Y93"
+        },
+        {
+          "name": "Y95"
+        },
+        {
+          "name": "Y100"
+        },
+        {
+          "name": "Y200"
+        },
+        {
+          "name": "Y500"
+        }
+      ]
+    },
+    {
+      "brand": "Xiaomi",
+      "is_default": false,
+      "models": [
+        {
+          "name": "Mi 4i"
+        },
+        {
+          "name": "Mi 5"
+        },
+        {
+          "name": "Mi 5s"
+        },
+        {
+          "name": "Mi 6"
+        },
+        {
+          "name": "Mi 8"
+        },
+        {
+          "name": "Mi 9"
+        },
+        {
+          "name": "Mi 9T"
+        },
+        {
+          "name": "Mi 10"
+        },
+        {
+          "name": "Mi 10T"
+        },
+        {
+          "name": "Mi 11"
+        },
+        {
+          "name": "Mi 11 Lite"
+        },
+        {
+          "name": "Xiaomi 11T"
+        },
+        {
+          "name": "Xiaomi 11T Pro"
+        },
+        {
+          "name": "Xiaomi 12"
+        },
+        {
+          "name": "Xiaomi 12 Pro"
+        },
+        {
+          "name": "Xiaomi 12T"
+        },
+        {
+          "name": "Xiaomi 12T Pro"
+        },
+        {
+          "name": "Xiaomi 13"
+        },
+        {
+          "name": "Xiaomi 13T"
+        },
+        {
+          "name": "Xiaomi 13T Pro"
+        },
+        {
+          "name": "Xiaomi 13 Ultra"
+        },
+        {
+          "name": "Xiaomi 14"
+        },
+        {
+          "name": "Xiaomi 14T"
+        },
+        {
+          "name": "Xiaomi 14T Pro"
+        },
+        {
+          "name": "Xiaomi 14 Ultra"
+        },
+        {
+          "name": "Xiaomi 15"
+        },
+        {
+          "name": "Xiaomi 15 Ultra"
+        },
+        {
+          "name": "Xiaomi 15T"
+        },
+        {
+          "name": "Xiaomi 17"
+        },
+        {
+          "name": "Xiaomi 17 Ultra"
+        },
+        {
+          "name": "Mi MIX"
+        },
+        {
+          "name": "Mi MIX 2"
+        },
+        {
+          "name": "Mi MIX 3"
+        },
+        {
+          "name": "Mi Note 10"
+        },
+        {
+          "name": "Mi Note 10 Pro"
+        },
+        {
+          "name": "Xiaomi MIX Fold 2"
+        },
+        {
+          "name": "Xiaomi MIX Fold 3"
+        },
+        {
+          "name": "Xiaomi MIX Fold 4"
+        }
+      ]
+    },
+    {
+      "brand": "ZTE / nubia",
+      "is_default": false,
+      "models": [
+        {
+          "name": "ZTE Blade A31"
+        },
+        {
+          "name": "ZTE Blade A51"
+        },
+        {
+          "name": "ZTE Blade A72"
+        },
+        {
+          "name": "ZTE Blade A73"
+        },
+        {
+          "name": "ZTE Blade A75"
+        },
+        {
+          "name": "ZTE Blade V40"
+        },
+        {
+          "name": "ZTE Blade V50"
+        },
+        {
+          "name": "nubia Z50"
+        },
+        {
+          "name": "nubia Z60 Ultra"
+        },
+        {
+          "name": "nubia Z70 Ultra"
+        },
+        {
+          "name": "nubia Flip 5G"
+        },
+        {
+          "name": "nubia Neo 2 5G"
+        },
+        {
+          "name": "nubia Neo 3 5G"
+        },
+        {
+          "name": "REDMAGIC 5G"
+        },
+        {
+          "name": "REDMAGIC 6"
+        },
+        {
+          "name": "REDMAGIC 7"
+        },
+        {
+          "name": "REDMAGIC 8 Pro"
+        },
+        {
+          "name": "REDMAGIC 9 Pro"
+        },
+        {
+          "name": "REDMAGIC 10 Pro"
+        }
+      ]
+    }
+  ]
+}
