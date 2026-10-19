@@ -226,7 +226,7 @@ export default function InventoryFormPage({ mode = "create" }) {
         )}
       </div>
 
-      {/* 4-Step Indicator Bar */}
+      {/* 4-Step Indicator Bar (Clickable directly to jump to any stage) */}
       <div className="grid grid-cols-4 gap-2">
         {[
           { num: 1, label: "Identitas" },
@@ -234,17 +234,21 @@ export default function InventoryFormPage({ mode = "create" }) {
           { num: 3, label: "Keuangan" },
           { num: 4, label: "Konfirmasi" }
         ].map((s) => (
-          <div
+          <button
             key={s.num}
-            className={`py-2 px-1 text-center rounded-xl border transition-all ${
-              stage >= s.num
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold"
-                : "border-slate-200 dark:border-slate-800 text-slate-400 text-xs"
+            type="button"
+            onClick={() => setStage(s.num)}
+            className={`py-2.5 px-1 text-center rounded-xl border transition-all cursor-pointer ${
+              stage === s.num
+                ? "border-blue-600 bg-blue-600 text-white font-bold shadow-sm shadow-blue-500/20"
+                : stage > s.num
+                ? "border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold"
+                : "border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold"
             }`}
           >
             <span className="text-[10px] block sm:inline mr-1">{s.num}.</span>
             <span className="text-xs truncate">{s.label}</span>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -267,18 +271,24 @@ export default function InventoryFormPage({ mode = "create" }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Brand Dropdown */}
+            {/* Brand Dropdown with Add Brand */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Merek / Brand *</Label>
-              <select
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Merek / Brand *</Label>
+                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">{availableBrands.length} Brand Terdaftar</span>
+              </div>
+              <input
+                list="brand-list"
                 value={formData.merek}
                 onChange={(e) => updateField("merek", e.target.value)}
+                placeholder="Pilih atau ketik merek..."
                 className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
-              >
+              />
+              <datalist id="brand-list">
                 {availableBrands.map((b) => (
-                  <option key={b} value={b}>{b}</option>
+                  <option key={b} value={b} />
                 ))}
-              </select>
+              </datalist>
             </div>
 
             {/* Model Dropdown */}
