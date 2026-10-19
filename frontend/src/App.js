@@ -34,6 +34,7 @@ import LaporanPage from "@/pages/admin/LaporanPage";
 import PengeluaranPage from "@/pages/admin/PengeluaranPage";
 import RiwayatPembayaranPage from "@/pages/admin/RiwayatPembayaranPage";
 import PosPage from "@/pages/admin/PosPage";
+import ImeiCheckPage from "@/pages/admin/ImeiCheckPage";
 import AnalitikV2Page from "@/pages/admin/AnalitikV2Page";
 import UserAnalyticsPage from "@/pages/admin/UserAnalyticsPage";
 
@@ -92,6 +93,7 @@ export default function App() {
                 <Route index element={<DashboardPage />} />
                 <Route path="inventaris" element={<InventoryListPage />} />
                 <Route path="penjualan" element={<PosPage />} />
+                <Route path="cek-imei" element={<ImeiCheckPage />} />
                 <Route path="analitik-v2" element={<ProtectedRoute roles={FINANCE}><AnalitikV2Page /></ProtectedRoute>} />
                 <Route path="analitik-user" element={<ProtectedRoute roles={FINANCE}><UserAnalyticsPage /></ProtectedRoute>} />
                 <Route path="inventaris/baru" element={<InventoryFormPage mode="create" />} />
