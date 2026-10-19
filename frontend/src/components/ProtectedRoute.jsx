@@ -12,15 +12,13 @@ export default function ProtectedRoute({ roles, children }) {
       </div>
     );
   }
+  // Jika belum login, redirect langsung ke "/" (halaman login bersih)
   if (!user) {
-    return <Navigate to="/masuk" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/" replace />;
   }
+  // Jika role bukan staff (misal token pelanggan lama tersisa), paksa logout dan arahkan ke login
   if (roles && !roles.includes(user.role)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-rose-600" data-testid="forbidden">
-        Hak akses tidak mencukupi
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
   return children;
 }
