@@ -28,9 +28,11 @@ export function AuthProvider({ children }) {
     try {
       const { data, headers } = await api.post("/auth/login", { email, password });
       const tok = headers["x-access-token"] || headers["X-Access-Token"];
-      if (tok) setBearer(tok);
-      const me = await refreshMe();
-      return me || data;
+      if (tok) {
+        setBearer(tok);
+      }
+      setUser(data);
+      return data;
     } catch (e) {
       const msg = formatApiErrorDetail(e?.response?.data?.detail) || e.message;
       throw new Error(msg);

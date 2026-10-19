@@ -19,11 +19,16 @@ export function setBearer(token) {
   }
 }
 
-// Pulihkan bearer saat refresh halaman
-const existing = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-if (existing) {
-  api.defaults.headers.common["Authorization"] = `Bearer ${existing}`;
-}
+// Pulihkan bearer saat refresh halaman dan tambahkan interceptor agar token selalu terkirim
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("access_token");
+    if (token && !config.headers["Authorization"]) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
 
 export function formatApiErrorDetail(detail) {
   if (detail == null) return "Terjadi kesalahan. Silakan coba lagi.";
