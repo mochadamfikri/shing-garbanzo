@@ -271,41 +271,39 @@ export default function InventoryFormPage({ mode = "create" }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Brand Dropdown with Add Brand */}
+            {/* Brand Dropdown (Select native) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Merek / Brand *</Label>
                 <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">{availableBrands.length} Brand Terdaftar</span>
               </div>
-              <input
-                list="brand-list"
+              <select
                 value={formData.merek}
                 onChange={(e) => updateField("merek", e.target.value)}
-                placeholder="Pilih atau ketik merek..."
-                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
-              />
-              <datalist id="brand-list">
+                className="w-full h-11 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
+              >
                 {availableBrands.map((b) => (
-                  <option key={b} value={b} />
+                  <option key={b} value={b}>{b}</option>
                 ))}
-              </datalist>
+              </select>
             </div>
 
-            {/* Model Dropdown */}
+            {/* Model Dropdown (Select native showing all models for selected brand) */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Model Perangkat *</Label>
-              <input
-                list="model-list"
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Model Perangkat *</Label>
+                <span className="text-[10px] text-slate-400">{availableModels.length} Model Tersedia</span>
+              </div>
+              <select
                 value={formData.model}
                 onChange={(e) => updateField("model", e.target.value)}
-                placeholder="Pilih atau ketik model..."
-                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
-              />
-              <datalist id="model-list">
+                className="w-full h-11 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
+              >
+                <option value="">-- Pilih Model {formData.merek} --</option>
                 {availableModels.map((m) => (
-                  <option key={m} value={m} />
+                  <option key={m} value={m}>{m}</option>
                 ))}
-              </datalist>
+              </select>
             </div>
 
             {/* Storage */}
