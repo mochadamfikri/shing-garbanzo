@@ -1,13 +1,11 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth";
-import { CartProvider } from "@/lib/cart";
 import { SettingsProvider } from "@/lib/settings";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminLayout from "@/components/AdminLayout";
-import StoreLayout from "@/components/StoreLayout";
-import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -15,98 +13,66 @@ import InventoryListPage from "@/pages/InventoryListPage";
 import InventoryFormPage from "@/pages/InventoryFormPage";
 import InventoryDetailPage from "@/pages/InventoryDetailPage";
 
-import StorefrontHome from "@/pages/StorefrontHome";
-import KatalogPage from "@/pages/KatalogPage";
-import ProdukDetailPage from "@/pages/ProdukDetailPage";
-import KeranjangPage from "@/pages/KeranjangPage";
-import CustomerRegisterPage from "@/pages/CustomerRegisterPage";
-import VerifyEmailPage from "@/pages/VerifyEmailPage";
-import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
-import AkunPage from "@/pages/AkunPage";
-import CheckoutPage from "@/pages/CheckoutPage";
-import PesananPage from "@/pages/PesananPage";
-import PesananDetailPage from "@/pages/PesananDetailPage";
-
 import PengaturanPage from "@/pages/admin/PengaturanPage";
-import OrdersAdminPage from "@/pages/admin/OrdersAdminPage";
-import OrderAdminDetailPage from "@/pages/admin/OrderAdminDetailPage";
 import LaporanPage from "@/pages/admin/LaporanPage";
-import PengeluaranPage from "@/pages/admin/PengeluaranPage";
-import RiwayatPembayaranPage from "@/pages/admin/RiwayatPembayaranPage";
 import PosPage from "@/pages/admin/PosPage";
 import ImeiCheckPage from "@/pages/admin/ImeiCheckPage";
-import AnalitikV2Page from "@/pages/admin/AnalitikV2Page";
-import UserAnalyticsPage from "@/pages/admin/UserAnalyticsPage";
 
 const STAFF = ["owner", "admin", "staf"];
 const FINANCE = ["owner", "admin"];
 
-function TentangPage() {
-  return (
-    <div className="max-w-3xl mx-auto px-5 py-12">
-      <h1 className="font-heading font-bold text-3xl mb-3">Tentang Toko HP</h1>
-      <p className="text-slate-600">Kami adalah toko smartphone yang menyediakan unit resmi dan inter dengan garansi toko dan pemeriksaan IMEI.</p>
-    </div>
-  );
-}
-
-function PrivasiPage() {
-  return (
-    <div className="max-w-3xl mx-auto px-5 py-12">
-      <h1 className="font-heading font-bold text-3xl mb-3">Kebijakan Privasi</h1>
-      <p className="text-slate-600 mb-3">Data pelanggan hanya digunakan untuk pengelolaan transaksi dan layanan toko. Persetujuan promosi bersifat opsional dan dapat dicabut kapan saja.</p>
-      <p className="text-slate-600">Anda berhak meminta akses, koreksi, dan penghapusan data pribadi Anda melalui kontak toko.</p>
-    </div>
-  );
-}
-
 export default function App() {
   return (
-    <AuthProvider>
-      <SettingsProvider>
-        <CartProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <AuthProvider>
+        <SettingsProvider>
           <BrowserRouter>
             <Toaster position="top-right" richColors />
             <Routes>
-              {/* Redirect root langsung ke admin / login karena storefront dimatikan */}
+              {/* Root redirect to admin */}
               <Route path="/" element={<Navigate to="/admin" replace />} />
               <Route path="/masuk" element={<LoginPage />} />
-              <Route path="/daftar" element={<CustomerRegisterPage />} />
-              <Route path="/verifikasi-email" element={<VerifyEmailPage />} />
-              <Route path="/lupa-password" element={<ForgotPasswordPage />} />
 
+              {/* Admin Protected Routes */}
               <Route
                 path="/admin"
-                element={<ProtectedRoute roles={STAFF}><AdminLayout /></ProtectedRoute>}
+                element={
+                  <ProtectedRoute roles={STAFF}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
               >
                 <Route index element={<DashboardPage />} />
                 <Route path="inventaris" element={<InventoryListPage />} />
-                <Route path="penjualan" element={<PosPage />} />
-                <Route path="cek-imei" element={<ImeiCheckPage />} />
-                <Route path="analitik-v2" element={<ProtectedRoute roles={FINANCE}><AnalitikV2Page /></ProtectedRoute>} />
-                <Route path="analitik-user" element={<ProtectedRoute roles={FINANCE}><UserAnalyticsPage /></ProtectedRoute>} />
                 <Route path="inventaris/baru" element={<InventoryFormPage mode="create" />} />
                 <Route path="inventaris/:id" element={<InventoryDetailPage />} />
                 <Route path="inventaris/:id/edit" element={<InventoryFormPage mode="edit" />} />
-                <Route path="pesanan" element={<OrdersAdminPage />} />
-                <Route path="pesanan/:id" element={<OrderAdminDetailPage />} />
-                <Route path="pembayaran-qris" element={<RiwayatPembayaranPage />} />
-                <Route path="laporan" element={
-                  <ProtectedRoute roles={FINANCE}><LaporanPage /></ProtectedRoute>
-                } />
-                <Route path="pengeluaran" element={
-                  <ProtectedRoute roles={FINANCE}><PengeluaranPage /></ProtectedRoute>
-                } />
-                <Route path="pengaturan" element={
-                  <ProtectedRoute roles={FINANCE}><PengaturanPage /></ProtectedRoute>
-                } />
+                <Route path="penjualan" element={<PosPage />} />
+                <Route path="cek-imei" element={<ImeiCheckPage />} />
+                <Route
+                  path="laporan"
+                  element={
+                    <ProtectedRoute roles={FINANCE}>
+                      <LaporanPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="pengaturan"
+                  element={
+                    <ProtectedRoute roles={FINANCE}>
+                      <PengaturanPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Route>
 
+              {/* Fallback all to admin */}
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Routes>
           </BrowserRouter>
-        </CartProvider>
-      </SettingsProvider>
-    </AuthProvider>
+        </SettingsProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

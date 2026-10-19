@@ -95,7 +95,7 @@ export default function LoginPage() {
 
           <div className="mt-3 flex flex-wrap justify-between gap-2 text-sm"><Link to="/lupa-password" className="text-blue-700 hover:underline">Lupa password?</Link><Link to="/verifikasi-email" className="text-blue-700 hover:underline">Verifikasi akun</Link></div>
           <div className="mt-6 pt-6 border-t border-slate-200 flex items-center justify-between text-sm">
-            <Link to="/" className="text-slate-500 hover:text-slate-900 inline-flex items-center gap-1.5" data-testid="link-storefront">
+            <Link to="/" className="text-slate-500 hover:text-slate-900 dark:text-slate-100 inline-flex items-center gap-1.5" data-testid="link-storefront">
               <Store className="w-4 h-4" /> Lihat Toko
             </Link>
             <Link to="/daftar" className="text-[#0052FF] hover:underline" data-testid="link-daftar">

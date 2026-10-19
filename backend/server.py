@@ -57,6 +57,7 @@ from routes_pos import router as pos_router
 from routes_reports_v2 import router as reports_v2_router
 from routes_payments import router as payments_router
 from routes_imei_check import router as imei_check_router
+from routes_reports_v3 import router as reports_v3_router
 
 app.include_router(auth_router)
 app.include_router(auth_security_router)
@@ -74,6 +75,7 @@ app.include_router(pos_router)
 app.include_router(reports_v2_router)
 app.include_router(payments_router)
 app.include_router(imei_check_router)
+app.include_router(reports_v3_router)
 
 # Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
