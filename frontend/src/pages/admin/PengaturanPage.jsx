@@ -99,7 +99,10 @@ export default function PengaturanPage() {
               <div className="md:col-span-2 border-t pt-4 mt-2 space-y-3">
                 <div><Label>Deskripsi footer (bagian bawah website)</Label><Textarea rows={3} maxLength={600} placeholder="Tentang toko, garansi, layanan..." value={s.footer_deskripsi ?? "Smartphone resmi & inter dengan garansi toko."} onChange={e=>setS({...s,footer_deskripsi:e.target.value})} data-testid="settings-footer-description"/><p className="text-xs text-slate-500 mt-1">Nama dan logo footer otomatis mengikuti identitas toko di atas.</p></div>
                 <div><Label>Tagline footer (baris paling bawah)</Label><Input maxLength={160} placeholder="Kalimat singkat tentang toko..." value={s.footer_tagline ?? "Belanja smartphone dengan nyaman dan aman"} onChange={e=>setS({...s,footer_tagline:e.target.value})} data-testid="settings-footer-tagline"/></div>
-                <div className="bg-slate-50 rounded-md border p-3 text-sm"><p className="font-bold">{s.nama_toko || "Toko HP"}</p><p className="text-slate-600 whitespace-pre-line mt-1">{s.footer_deskripsi ?? "Smartphone resmi & inter dengan garansi toko."}</p><p className="text-xs text-slate-500 mt-2">© {new Date().getFullYear()} {s.nama_toko || "Toko HP"} · {s.footer_tagline ?? "Belanja smartphone dengan nyaman dan aman"}</p></div>
+                <div className="bg-slate-50 dark:bg-slate-800/40 rounded-md border border-slate-200 dark:border-slate-700 p-3 text-sm">
+                  <p className="font-bold text-slate-900 dark:text-white">{s.nama_toko || "Sadam Gadget"}</p>
+                  <p className="text-xs text-slate-500 mt-1">Sistem Rekapitulasi Internal</p>
+                </div>
               </div>
             </div>
             <div><Label>Alamat toko</Label><Textarea rows={2} value={s.alamat_toko || ""} onChange={(e) => setS({ ...s, alamat_toko: e.target.value })} /></div>

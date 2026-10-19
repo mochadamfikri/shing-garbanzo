@@ -18,7 +18,7 @@ export function SettingsProvider({ children }) {
   useEffect(() => { refresh(); }, [refresh]);
   useEffect(() => {
     if (!settings) return;
-    document.title = `${settings.nama_toko || "Toko HP"} | Toko Online`;
+    document.title = `${settings.nama_toko || "Sadam Gadget"}`;
     if (settings.logo_url) {
       let ico = document.querySelector('link[rel="icon"]');
       if (!ico) { ico=document.createElement("link");ico.rel="icon";document.head.appendChild(ico); }

@@ -50,7 +50,7 @@ function ClickableStatCard({ icon: Icon, label, value, subtitle, testId, colorCl
         </div>
       </div>
       <div className="mt-3 flex items-center text-[11px] font-semibold text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-        Lihat Detail <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+        Lihat Rincian <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
       </div>
     </Card>
   );
@@ -162,7 +162,7 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-2.5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-            <CalendarDays className="w-3.5 h-3.5 text-blue-500" /> Rekap Penjualan & Laporan Berkala (Klik Kartu untuk Buka Modal / Unduh Excel)
+            <CalendarDays className="w-3.5 h-3.5 text-blue-500" /> Rekap Penjualan
           </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
@@ -187,7 +187,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center">
-              Laba Bersih: {formatRupiah(periodSummaries.daily?.laba_bersih ?? 0)} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              Lihat Rincian <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </div>
           </Card>
 
@@ -212,7 +212,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center">
-              Laba Bersih: {formatRupiah(periodSummaries.weekly?.laba_bersih ?? 0)} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              Lihat Rincian <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </div>
           </Card>
 
@@ -237,14 +237,14 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex items-center">
-              Laba Bersih: {formatRupiah(periodSummaries.monthly?.laba_bersih ?? 0)} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              Lihat Rincian <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </div>
           </Card>
         </div>
 
         <div className="flex items-center justify-between mb-2.5">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5" /> Ringkasan Unit Fisik (Klik kartu untuk detail)
+            <Layers className="w-3.5 h-3.5" /> Stok Fisik Unit
           </h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -292,7 +292,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-2.5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Ringkasan Keuangan Penjualan (Riil dari Kasir)
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Rekap Keuangan
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">

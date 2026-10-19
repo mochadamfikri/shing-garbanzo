@@ -1,106 +1,58 @@
 import { useEffect, useState, useMemo } from "react";
 import { api, formatApiErrorDetail } from "@/lib/api";
-import {downloadCsv} from "@/lib/download";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatRupiah, formatTanggalID } from "@/lib/format";
 import { toast } from "sonner";
 import {
-  ResponsiveContainer, AreaChart, Area, BarChart, Bar, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Cell,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend
 } from "recharts";
-import { TrendingUp, TrendingDown, Package, Download, Wallet, Receipt } from "lucide-react";
-
-function KpiCard({ label, value, icon: Icon, accent, subtitle, testId }) {
-  return (
-    <Card className="p-5" data-testid={testId}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{label}</p>
-          <p className="font-heading font-bold text-xl md:text-2xl mt-1 font-mono-tabular">{value}</p>
-          {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
-        </div>
-        <div className={`w-9 h-9 rounded-md flex items-center justify-center ${accent || "bg-blue-50 text-[#0052FF]"}`}>
-          <Icon className="w-5 h-5" />
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function formatDayShort(dateStr) {
-  try {
-    const d = new Date(dateStr);
-    return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`;
-  } catch { return dateStr; }
-}
-
-function CustomTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-white border border-slate-200 rounded-md shadow-md p-2 text-xs">
-      <p className="font-medium">{formatTanggalID(label)}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>
-          {p.name}: <span className="font-mono-tabular">{formatRupiah(p.value)}</span>
-        </p>
-      ))}
-    </div>
-  );
-}
-
-function OhlcChart({ data }) {
-  if (!data?.length) return <p className="text-center text-sm text-slate-500 py-10">Belum ada data mingguan.</p>;
-  const chartData = data.map((d) => {
-    const up = d.close >= d.open;
-    return { ...d, color: up ? "#10b981" : "#ef4444", bodyMin: Math.min(d.open, d.close), bodyMax: Math.max(d.open, d.close), bodyRange: [Math.min(d.open, d.close), Math.max(d.open, d.close)], wick: [d.low, d.high] };
-  });
-  return (
-    <ResponsiveContainer width="100%" height={300}>
-      <ComposedChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-        <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-        <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => "Rp " + (v / 1_000_000).toFixed(0) + "jt"} />
-        <Tooltip
-          formatter={(v, k) => [formatRupiah(v), k]}
-          labelFormatter={(l) => `Minggu ${l}`}
-        />
-        {/* wick: low–high */}
-        <Bar dataKey="wick" fill="#64748b" barSize={2} isAnimationActive={false} />
-        {/* body: open–close */}
-        <Bar dataKey="bodyRange" barSize={12} isAnimationActive={false}>
-          {chartData.map((d, i) => <Cell key={i} fill={d.color} />)}
-        </Bar>
-      </ComposedChart>
-    </ResponsiveContainer>
-  );
-}
+import {
+  TrendingUp,
+  Download,
+  Wallet,
+  Receipt,
+  FileSpreadsheet,
+  Calendar,
+  Layers,
+  Sparkles,
+  ShoppingBag
+} from "lucide-react";
 
 export default function LaporanPage() {
   const today = new Date();
-  const start30 = new Date(today); start30.setDate(start30.getDate() - 29);
+  const start30 = new Date(today);
+  start30.setDate(start30.getDate() - 29);
   const toIso = (d) => d.toISOString().slice(0, 10);
 
   const [start, setStart] = useState(toIso(start30));
   const [end, setEnd] = useState(toIso(today));
   const [summary, setSummary] = useState(null);
   const [ts, setTs] = useState(null);
-  const [invValue, setInvValue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
   const load = async () => {
-    setLoading(true); setErr("");
+    setLoading(true);
+    setErr("");
     try {
-      const [a, b, c] = await Promise.all([
+      const [resSummary, resTs] = await Promise.all([
         api.get("/reports/summary", { params: { start, end } }),
         api.get("/reports/timeseries", { params: { start, end } }),
-        api.get("/reports/inventory-value"),
       ]);
-      setSummary(a.data); setTs(b.data); setInvValue(c.data);
+      setSummary(resSummary.data);
+      setTs(resTs.data);
     } catch (e) {
       setErr(formatApiErrorDetail(e?.response?.data?.detail) || e.message);
     } finally {
@@ -108,187 +60,274 @@ export default function LaporanPage() {
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const quickRange = (days) => {
-    const e = new Date(); const s = new Date(); s.setDate(s.getDate() - days + 1);
-    setStart(toIso(s)); setEnd(toIso(e));
+    const e = new Date();
+    const s = new Date();
+    s.setDate(s.getDate() - days + 1);
+    setStart(toIso(s));
+    setEnd(toIso(e));
   };
 
-  const exportCsv = async (jenis) => {
-    try {
-      await downloadCsv(`/reports/export?jenis=${encodeURIComponent(jenis)}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`, `${jenis}_${start}_${end}.csv`);
-      toast.success(`Laporan ${jenis} berhasil disiapkan untuk diunduh`);
-    } catch(e) {
-      toast.error("Unduhan gagal: " + (e?.response?.status===401?"Silakan login ulang":e.message||"Coba lagi"));
-    }
+  const downloadExcel = (period) => {
+    window.open(`${process.env.REACT_APP_BACKEND_URL || ""}/api/reports-v3/export-excel?period=${period}`, "_blank");
   };
 
   const chartData = useMemo(() => {
     if (!ts?.harian) return [];
-    return ts.harian.map((r) => ({ ...r, labelShort: formatDayShort(r.tanggal) }));
+    return ts.harian.map((r) => {
+      const parts = r.tanggal.split("-");
+      return {
+        ...r,
+        labelShort: `${parts[2]}/${parts[1]}`
+      };
+    });
   }, [ts]);
 
   return (
-    <div className="space-y-5" data-testid="laporan-page">
-      <div>
-        <h1 className="font-heading font-bold text-3xl">Laporan Keuangan</h1>
-        <p className="text-slate-500">Omzet, HPP, laba, pengeluaran, dan grafik pergerakan.</p>
+    <div className="space-y-5 pb-16 md:pb-6" data-testid="laporan-page">
+      {/* Title & Excel Fast Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white">
+            Laporan Keuangan Toko
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Rekap omzet, HPP, laba bersih riil, dan ekspor lembar kerja Excel (.xlsx)
+          </p>
+        </div>
+
+        {/* Quick Excel Downloads */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+          <Button
+            size="sm"
+            onClick={() => downloadExcel("daily")}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9 shrink-0 shadow-sm"
+          >
+            <Download className="w-3.5 h-3.5 mr-1.5" /> Unduh Harian (.xlsx)
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => downloadExcel("monthly")}
+            className="font-semibold text-xs h-9 shrink-0 dark:border-slate-700"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 mr-1.5 text-emerald-600" /> Unduh Bulanan
+          </Button>
+        </div>
       </div>
 
-      <Card className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
-          <div><Label>Mulai</Label><Input type="date" value={start} onChange={(e) => setStart(e.target.value)} data-testid="lap-start" /></div>
-          <div><Label>Akhir</Label><Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} data-testid="lap-end" /></div>
-          <div className="md:col-span-3 flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={() => quickRange(1)} data-testid="lap-range-today">Hari Ini</Button>
-            <Button size="sm" variant="outline" onClick={() => quickRange(7)} data-testid="lap-range-7">7 Hari</Button>
-            <Button size="sm" variant="outline" onClick={() => quickRange(30)} data-testid="lap-range-30">30 Hari</Button>
-            <Button size="sm" variant="outline" onClick={() => quickRange(90)} data-testid="lap-range-90">90 Hari</Button>
-            <Button size="sm" variant="outline" onClick={() => quickRange(365)} data-testid="lap-range-365">1 Tahun</Button>
+      {/* Date Filter Card (Mobile Friendly Touch Buttons) */}
+      <Card className="p-4 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { d: 1, label: "Hari Ini" },
+            { d: 7, label: "7 Hari" },
+            { d: 30, label: "30 Hari" },
+            { d: 90, label: "3 Bulan" },
+            { d: 365, label: "1 Tahun" }
+          ].map((q) => (
+            <button
+              key={q.d}
+              type="button"
+              onClick={() => quickRange(q.d)}
+              className="py-1.5 px-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors"
+            >
+              {q.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-end pt-1">
+          <div>
+            <Label className="text-[10px] uppercase font-bold text-slate-400">Tanggal Mulai</Label>
+            <Input
+              type="date"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+              className="h-9 text-xs dark:bg-slate-800 dark:border-slate-700"
+            />
           </div>
-          <Button onClick={load} className="bg-[#0052FF] hover:bg-[#0040CC]" data-testid="btn-apply-range">Terapkan</Button>
+          <div>
+            <Label className="text-[10px] uppercase font-bold text-slate-400">Tanggal Akhir</Label>
+            <Input
+              type="date"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+              className="h-9 text-xs dark:bg-slate-800 dark:border-slate-700"
+            />
+          </div>
+          <div className="col-span-2 sm:col-span-1">
+            <Button
+              onClick={load}
+              className="w-full h-9 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs"
+            >
+              Terapkan Filter
+            </Button>
+          </div>
         </div>
       </Card>
 
-      {err && <p className="text-rose-600 text-sm">{err}</p>}
-      {loading && <p className="text-slate-500">Memuat...</p>}
-
-      {summary && (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <KpiCard label="Omzet" value={formatRupiah(summary.omzet)} icon={TrendingUp} accent="bg-emerald-50 text-emerald-600" testId="kpi-omzet" subtitle={`${summary.total_pesanan} pesanan`} />
-            <KpiCard label="HPP" value={formatRupiah(summary.hpp)} icon={Package} accent="bg-amber-50 text-amber-600" testId="kpi-hpp" />
-            <KpiCard label="Laba Kotor" value={formatRupiah(summary.laba_kotor)} icon={TrendingUp} accent="bg-blue-50 text-[#0052FF]" testId="kpi-laba-kotor" />
-            <KpiCard label="Pengeluaran" value={formatRupiah(summary.pengeluaran)} icon={Receipt} accent="bg-rose-50 text-rose-600" testId="kpi-pengeluaran" />
-            <KpiCard label="Laba Bersih" value={formatRupiah(summary.laba_bersih)} icon={summary.profit_loss === "PROFIT" ? TrendingUp : TrendingDown} accent={summary.profit_loss === "PROFIT" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"} testId="kpi-laba-bersih" subtitle={summary.profit_loss} />
-            <KpiCard label="Unit Terjual" value={summary.unit_terjual} icon={Package} testId="kpi-unit" />
-          </div>
-
-          <Tabs defaultValue="pergerakan">
-            <TabsList>
-              <TabsTrigger value="pergerakan" data-testid="tab-pergerakan">Pergerakan Keuangan</TabsTrigger>
-              <TabsTrigger value="penjualan" data-testid="tab-penjualan">Tingkat Penjualan</TabsTrigger>
-              <TabsTrigger value="ohlc" data-testid="tab-ohlc">Candle Mingguan (OHLC)</TabsTrigger>
-              <TabsTrigger value="rincian" data-testid="tab-rincian">Rincian</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="pergerakan">
-              <Card className="p-5 mt-4">
-                <h2 className="font-heading font-semibold mb-3">Grafik Pergerakan Keuangan Harian</h2>
-                <ResponsiveContainer width="100%" height={320}>
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                    <defs>
-                      <linearGradient id="colOmzet" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity={0.6} />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="colLaba" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#0052FF" stopOpacity={0.5} />
-                        <stop offset="100%" stopColor="#0052FF" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="labelShort" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => "Rp " + (v / 1_000_000).toFixed(0) + "jt"} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Area type="monotone" dataKey="omzet" name="Omzet" stroke="#10b981" fill="url(#colOmzet)" strokeWidth={2} />
-                    <Area type="monotone" dataKey="laba_kotor" name="Laba Kotor" stroke="#0052FF" fill="url(#colLaba)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="pengeluaran" name="Pengeluaran" stroke="#ef4444" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="laba_bersih" name="Laba Bersih" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="penjualan">
-              <Card className="p-5 mt-4">
-                <h2 className="font-heading font-semibold mb-3">Tingkat Penjualan Harian</h2>
-                <ResponsiveContainer width="100%" height={320}>
-                  <ComposedChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="labelShort" tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => "Rp " + (v / 1_000_000).toFixed(0) + "jt"} />
-                    <Tooltip formatter={(v, k) => k === "Unit Terjual" || k === "Pesanan" ? [v, k] : [formatRupiah(v), k]} labelFormatter={formatTanggalID} />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar yAxisId="left" dataKey="unit_terjual" name="Unit Terjual" fill="#0052FF" />
-                    <Bar yAxisId="left" dataKey="pesanan" name="Pesanan" fill="#8b5cf6" />
-                    <Line yAxisId="right" type="monotone" dataKey="omzet" name="Omzet" stroke="#10b981" strokeWidth={2} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="ohlc">
-              <Card className="p-5 mt-4">
-                <h2 className="font-heading font-semibold mb-1">Candle Mingguan Omzet (OHLC)</h2>
-                <p className="text-xs text-slate-500 mb-3">Open/High/Low/Close dari omzet harian per minggu. Hijau = minggu naik.</p>
-                <OhlcChart data={ts?.mingguan_ohlc} />
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="rincian">
-              <div className="grid md:grid-cols-2 gap-4 mt-4">
-                <Card className="p-5">
-                  <h2 className="font-heading font-semibold mb-3">Top Produk Periode</h2>
-                  {summary.top_produk?.length ? (
-                    <ul className="divide-y">
-                      {summary.top_produk.map((p) => (
-                        <li key={p.produk} className="flex justify-between py-2 text-sm">
-                          <span>{p.produk}</span>
-                          <span className="font-mono-tabular font-medium">{p.unit} unit</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : <p className="text-sm text-slate-500">Belum ada penjualan di rentang ini.</p>}
-                </Card>
-                <Card className="p-5">
-                  <h2 className="font-heading font-semibold mb-3">Pengeluaran per Kategori</h2>
-                  {summary.pengeluaran_per_kategori?.length ? (
-                    <ul className="divide-y">
-                      {summary.pengeluaran_per_kategori.map((p) => (
-                        <li key={p.kategori} className="flex justify-between py-2 text-sm">
-                          <span>{p.kategori}</span>
-                          <span className="font-mono-tabular font-medium">{formatRupiah(p.nominal)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : <p className="text-sm text-slate-500">Belum ada pengeluaran di rentang ini.</p>}
-                </Card>
-                {invValue && (
-                  <Card className="p-5 md:col-span-2">
-                    <h2 className="font-heading font-semibold mb-3">Nilai Inventaris Saat Ini</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div><p className="text-xs text-slate-500 uppercase tracking-wide">Total Unit</p><p className="font-mono-tabular font-semibold text-lg">{invValue.total_unit}</p></div>
-                      <div><p className="text-xs text-slate-500 uppercase tracking-wide">Modal Stok</p><p className="font-mono-tabular font-semibold text-lg">{formatRupiah(invValue.total_modal)}</p></div>
-                      <div><p className="text-xs text-slate-500 uppercase tracking-wide">Nilai Jual Stok</p><p className="font-mono-tabular font-semibold text-lg">{formatRupiah(invValue.total_nilai_jual)}</p></div>
-                      <div><p className="text-xs text-slate-500 uppercase tracking-wide">Potensi Laba</p><p className="font-mono-tabular font-semibold text-lg text-emerald-600">{formatRupiah(invValue.estimasi_laba_potensial)}</p></div>
-                    </div>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          <Card className="p-5">
-            <h2 className="font-heading font-semibold mb-3">Export</h2>
-            <div className="flex flex-wrap gap-3">
-              <Button variant="outline" onClick={() => exportCsv("keuangan")} data-testid="btn-export-keuangan">
-                <Download className="w-4 h-4 mr-1.5" /> Keuangan Harian (CSV)
-              </Button>
-              <Button variant="outline" onClick={() => exportCsv("penjualan")} data-testid="btn-export-penjualan">
-                <Download className="w-4 h-4 mr-1.5" /> Penjualan Per Pesanan (CSV)
-              </Button>
-              <Button variant="outline" onClick={() => exportCsv("pengeluaran")} data-testid="btn-export-pengeluaran">
-                <Download className="w-4 h-4 mr-1.5" /> Pengeluaran (CSV)
-              </Button>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">CSV dapat dibuka di Excel/Google Sheets.</p>
-          </Card>
-        </>
+      {err && (
+        <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 text-rose-700 dark:text-rose-300 rounded-xl text-xs">
+          {err}
+        </div>
       )}
+
+      {/* Main KPI Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Omzet */}
+        <Card className="p-3.5 sm:p-4 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">
+              Total Omzet
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center">
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="font-heading font-extrabold text-xl sm:text-2xl mt-1 text-slate-900 dark:text-white font-mono-tabular">
+            {formatRupiah(summary?.omzet ?? 0)}
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">
+            {summary?.total_pesanan ?? 0} Transaksi Kasir
+          </span>
+        </Card>
+
+        {/* HPP Modal */}
+        <Card className="p-3.5 sm:p-4 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">
+              Modal Terjual (HPP)
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 flex items-center justify-center">
+              <Layers className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="font-heading font-extrabold text-xl sm:text-2xl mt-1 text-slate-700 dark:text-slate-300 font-mono-tabular">
+            {formatRupiah(summary?.hpp ?? 0)}
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">
+            Beban modal pokok unit
+          </span>
+        </Card>
+
+        {/* Laba Bersih Riil */}
+        <Card className="p-3.5 sm:p-4 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">
+              Laba Bersih Riil
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="font-heading font-extrabold text-xl sm:text-2xl mt-1 text-emerald-600 dark:text-emerald-400 font-mono-tabular">
+            {formatRupiah(summary?.laba_bersih ?? 0)}
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">
+            Laba kotor: {formatRupiah(summary?.laba_kotor ?? 0)}
+          </span>
+        </Card>
+
+        {/* Unit HP Terjual */}
+        <Card className="p-3.5 sm:p-4 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">
+              Unit HP Terjual
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-600 flex items-center justify-center">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="font-heading font-extrabold text-xl sm:text-2xl mt-1 text-purple-600 dark:text-purple-400 font-mono-tabular">
+            {summary?.unit_terjual ?? 0} Unit
+          </p>
+          <span className="text-[10px] text-slate-400 mt-0.5 block">
+            Fisik smartphone keluar
+          </span>
+        </Card>
+      </div>
+
+      {/* Financial Movement Chart (Interactive & Responsive on Mobile) */}
+      <Card className="p-4 sm:p-5 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+            Grafik Pergerakan Omzet & Laba
+          </h2>
+          <span className="text-xs text-slate-400">Rentang Terpilih</span>
+        </div>
+
+        <div className="w-full h-64 sm:h-80 -ml-2 sm:ml-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+              <defs>
+                <linearGradient id="colOmzet" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#2563eb" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colLaba" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
+              <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+              <YAxis
+                tick={{ fontSize: 10 }}
+                tickFormatter={(v) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}jt` : v)}
+                stroke="#94a3b8"
+                width={45}
+              />
+              <Tooltip
+                formatter={(v) => [formatRupiah(v), ""]}
+                contentStyle={{
+                  backgroundColor: "#0f172a",
+                  borderColor: "#334155",
+                  borderRadius: "0.75rem",
+                  fontSize: "12px",
+                  color: "#fff"
+                }}
+              />
+              <Legend wrapperStyle={{ fontSize: "11px" }} />
+              <Area type="monotone" dataKey="omzet" name="Omzet Kasir" stroke="#2563eb" fill="url(#colOmzet)" strokeWidth={2} />
+              <Area type="monotone" dataKey="laba_kotor" name="Laba Bersih" stroke="#10b981" fill="url(#colLaba)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      {/* Top Product Sold List */}
+      <Card className="p-4 sm:p-5 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
+        <h3 className="font-heading font-bold text-sm text-slate-900 dark:text-white">
+          Perangkat Terlaris di Periode Ini
+        </h3>
+        {(!summary?.top_produk || summary.top_produk.length === 0) ? (
+          <p className="text-xs text-slate-400 py-6 text-center">Belum ada transaksi di rentang tanggal ini.</p>
+        ) : (
+          <div className="space-y-2">
+            {summary.top_produk.map((p, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-xs"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center text-[10px]">
+                    {idx + 1}
+                  </span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{p.nama}</span>
+                </div>
+                <span className="font-mono font-bold text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60">
+                  {p.count} Unit
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

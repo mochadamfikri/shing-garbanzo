@@ -46,8 +46,8 @@ export default function InventoryListPage() {
     <div className="space-y-5" data-testid="inventory-list-page">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">Inventaris HP</h1>
-          <p className="text-slate-500">Kelola stok smartphone per unit.</p>
+          <h1 className="font-heading text-3xl font-bold tracking-tight">Data Unit</h1>
+          <p className="text-slate-500">Rekap data unit dan status fisik perangkat.</p>
         </div>
         <Link to="/admin/inventaris/baru">
           <Button className="bg-[#0052FF] hover:bg-[#0040CC]" data-testid="btn-add-unit">
