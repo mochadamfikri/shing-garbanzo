@@ -56,6 +56,7 @@ from routes_expenses import router as expenses_router
 from routes_pos import router as pos_router
 from routes_reports_v2 import router as reports_v2_router
 from routes_payments import router as payments_router
+from routes_imei_check import router as imei_check_router
 
 app.include_router(auth_router)
 app.include_router(auth_security_router)
@@ -72,6 +73,7 @@ app.include_router(expenses_router)
 app.include_router(pos_router)
 app.include_router(reports_v2_router)
 app.include_router(payments_router)
+app.include_router(imei_check_router)
 
 # Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -120,6 +122,7 @@ async def on_startup():
     await db.pos_sales.create_index("idempotency_key", unique=True)
     await db.pos_sales.create_index("tanggal_jual")
     await db.webhook_events.create_index("event_id", unique=True)
+    await db.imei_check_orders.create_index("order_id", unique=True)
 
     owner_email = os.environ.get("OWNER_EMAIL", "owner@tokohp.id").lower()
     owner_password = os.environ.get("OWNER_PASSWORD")
