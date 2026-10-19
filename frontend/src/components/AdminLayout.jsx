@@ -15,6 +15,7 @@ const NAV_ALL = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, testId: "nav-dashboard" },
   { to: "/admin/inventaris", label: "Inventaris HP", icon: Smartphone, testId: "nav-inventaris" },
   { to: "/admin/penjualan", label: "Penjualan Kasir", icon: ScanLine, testId: "nav-pos" },
+  { to: "/admin/cek-imei", label: "Cek IMEI CeirGO", icon: Smartphone, testId: "nav-cek-imei" },
   { to: "/admin/analitik-v2", label: "Analitik V2", icon: BarChart3, testId: "nav-analitik-v2", roles:["owner","admin"] },
   { to: "/admin/analitik-user", label: "Analitik User", icon: LayoutDashboard, testId: "nav-analitik-user", roles:["owner","admin"] },
   { to: "/admin/pesanan", label: "Pesanan", icon: ShoppingCart, testId: "nav-pesanan" },
