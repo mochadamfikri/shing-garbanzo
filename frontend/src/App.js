@@ -68,19 +68,8 @@ export default function App() {
           <BrowserRouter>
             <Toaster position="top-right" richColors />
             <Routes>
-              <Route element={<StoreLayout />}>
-                <Route path="/" element={<StorefrontHome />} />
-                <Route path="/katalog" element={<KatalogPage />} />
-                <Route path="/produk/:id" element={<ProdukDetailPage />} />
-                <Route path="/keranjang" element={<KeranjangPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/pesanan" element={<PesananPage />} />
-                <Route path="/pesanan/:id" element={<PesananDetailPage />} />
-                <Route path="/akun" element={<AkunPage />} />
-                <Route path="/tentang" element={<TentangPage />} />
-                <Route path="/privasi" element={<PrivasiPage />} />
-              </Route>
-
+              {/* Redirect root langsung ke admin / login karena storefront dimatikan */}
+              <Route path="/" element={<Navigate to="/admin" replace />} />
               <Route path="/masuk" element={<LoginPage />} />
               <Route path="/daftar" element={<CustomerRegisterPage />} />
               <Route path="/verifikasi-email" element={<VerifyEmailPage />} />
@@ -113,9 +102,8 @@ export default function App() {
                 } />
               </Route>
 
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
             </Routes>
-            <WhatsAppFloat />
           </BrowserRouter>
         </CartProvider>
       </SettingsProvider>

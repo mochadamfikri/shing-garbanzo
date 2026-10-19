@@ -143,7 +143,7 @@ async def _availability(service_code):
                 "message": detail.get("message", TEMPORARY_TEXT),
                 "service": service_code, "price": None}
     except (httpx.RequestError, ValueError):
-        logger.warning("CeirGO readiness endpoint unavailable")
+        logger.warning("CEIR readiness endpoint unavailable")
         return {"state": "provider_unavailable", "message": TEMPORARY_TEXT,
                 "service": service_code, "price": None}
 
@@ -183,17 +183,17 @@ async def submit_check(payload: CheckRequest,
     except HTTPException:
         raise
     except httpx.RequestError:
-        logger.warning("CeirGO paid order outcome uncertain; check provider order history")
+        logger.warning("CEIR paid order outcome uncertain; check provider order history")
         raise HTTPException(503, {"state": "outcome_unknown",
-                                  "message": "Status transaksi belum dapat dipastikan. Periksa riwayat CeirGO sebelum mengulangi."})
+                                  "message": "Status transaksi belum dapat dipastikan. Periksa riwayat CEIR sebelum mengulangi."})
     order_status = str(data.get("status", "")).lower()
     if order_status not in {"success", "partial", "failed", "pending"}:
         raise HTTPException(503, {"state": "outcome_unknown",
-                                  "message": "Respons transaksi tidak dikenali. Periksa riwayat CeirGO."})
+                                  "message": "Respons transaksi tidak dikenali. Periksa riwayat CEIR."})
     order_id = data.get("order_id")
     if not isinstance(order_id, int) or order_id < 1:
         raise HTTPException(503, {"state": "outcome_unknown",
-                                  "message": "ID transaksi tidak tersedia. Periksa riwayat CeirGO."})
+                                  "message": "ID transaksi tidak tersedia. Periksa riwayat CEIR."})
     # The order belongs to this authenticated staff member; save no sensitive response.
     from server import db
     await db.imei_check_orders.update_one(

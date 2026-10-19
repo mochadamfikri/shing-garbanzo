@@ -8,7 +8,7 @@ import ImeiScanner from "@/components/ImeiScanner";
 import { AlertCircle, CheckCircle2, RefreshCw, ScanLine, Smartphone } from "lucide-react";
 
 const SERVICES = [
-  { code: "cek_imei", name: "Status IMEI", description: "REGISTERED, UNKNOWN, ROAMER dan status dari CeirGO" },
+  { code: "cek_imei", name: "Status IMEI", description: "REGISTERED, UNKNOWN, ROAMER dan status dari CEIR" },
   { code: "cek_sf", name: "Roamer / SF", description: "Status roamer pada layanan SF" },
   { code: "cek_digi", name: "Roamer / DIGI", description: "Status roamer pada layanan DIGI" },
   { code: "cek_imei_beacukai", name: "Registrasi Bea Cukai", description: "Pendaftaran IMEI melalui jalur Bea Cukai" },
@@ -88,7 +88,7 @@ export default function ImeiCheckPage() {
       return;
     }
     const confirmation = window.confirm(
-      "Pengecekan ini dikenakan biaya CeirGO " +
+      "Pengecekan ini dikenakan biaya CEIR " +
       formatRupiah(readiness.price) + " per IMEI. Lanjutkan pengecekan berbayar?"
     );
     if (!confirmation) return;
@@ -141,13 +141,13 @@ export default function ImeiCheckPage() {
           <Smartphone className="h-7 w-7 text-blue-600" /> Cek IMEI
         </h1>
         <p className="text-sm text-slate-500">
-          Pengecekan status perangkat menggunakan CeirGO. Terpisah dari stok dan penjualan.
+          Pengecekan status perangkat menggunakan CEIR. Terpisah dari stok dan penjualan.
         </p>
       </div>
 
       <Card className="p-4 md:p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-semibold">Layanan CeirGO</h2>
+          <h2 className="font-semibold">Layanan CEIR</h2>
           <Button type="button" size="sm" variant="outline" onClick={() => loadStatus(service)} disabled={loadingStatus || busy}>
             <RefreshCw className="h-4 w-4 mr-2" /> Perbarui Status
           </Button>
@@ -171,15 +171,15 @@ export default function ImeiCheckPage() {
               ready ? "Layanan siap digunakan" : activationRequired ?
               ACTIVATION_MESSAGE : readiness?.message || "Belum dapat memeriksa layanan"}</b>
             {ready && <p className="mt-1">Tarif pengecekan: {formatRupiah(readiness.price)} / IMEI.</p>}
-            {activationRequired && <p className="mt-1">Hubungi pengelola untuk mengaktifkan layanan CeirGO.</p>}
+            {activationRequired && <p className="mt-1">Hubungi pengelola untuk mengaktifkan layanan CEIR.</p>}
           </div>
         </div>
       </Card>
 
       <Card className="p-4 md:p-6 space-y-3">
-        <label className="text-sm font-semibold block" htmlFor="ceirgo-imei">Nomor IMEI</label>
+        <label className="text-sm font-semibold block" htmlFor="ceir-imei">Nomor IMEI</label>
         <div className="flex gap-2">
-          <Input id="ceirgo-imei" inputMode="numeric" autoComplete="off" maxLength={15}
+          <Input id="ceir-imei" inputMode="numeric" autoComplete="off" maxLength={15}
             placeholder="15 digit IMEI" data-testid="imei-check-input"
             value={imei} onChange={(e) => changeImei(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } }} />
@@ -212,7 +212,7 @@ export default function ImeiCheckPage() {
             </Button>
           )}
           <p className="text-xs text-slate-500">
-            Hasil ini berasal dari penyedia CeirGO. UNKNOWN/tidak ada catatan tidak otomatis berarti IMEI blocked.
+            Hasil ini berasal dari penyedia CEIR. UNKNOWN/tidak ada catatan tidak otomatis berarti IMEI blocked.
             Pengecekan ini tidak dapat membuka SIM Lock atau mendaftarkan IMEI.
           </p>
         </Card>

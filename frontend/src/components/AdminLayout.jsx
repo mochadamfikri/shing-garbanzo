@@ -15,7 +15,7 @@ const NAV_ALL = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, testId: "nav-dashboard" },
   { to: "/admin/inventaris", label: "Inventaris HP", icon: Smartphone, testId: "nav-inventaris" },
   { to: "/admin/penjualan", label: "Penjualan Kasir", icon: ScanLine, testId: "nav-pos" },
-  { to: "/admin/cek-imei", label: "Cek IMEI CeirGO", icon: Smartphone, testId: "nav-cek-imei" },
+  { to: "/admin/cek-imei", label: "Cek IMEI CEIR", icon: Smartphone, testId: "nav-cek-imei" },
   { to: "/admin/analitik-v2", label: "Analitik V2", icon: BarChart3, testId: "nav-analitik-v2", roles:["owner","admin"] },
   { to: "/admin/analitik-user", label: "Analitik User", icon: LayoutDashboard, testId: "nav-analitik-user", roles:["owner","admin"] },
   { to: "/admin/pesanan", label: "Pesanan", icon: ShoppingCart, testId: "nav-pesanan" },
@@ -79,48 +79,6 @@ export default function AdminLayout() {
             </Link>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative" data-testid="admin-notif">
-              <Button variant="ghost" size="icon" onClick={() => setPanelOpen((o) => !o)} data-testid="btn-notif" aria-label="Notifikasi">
-                <Bell className="w-5 h-5" />
-                {notif.count > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-[#FF5722] text-white text-[10px] rounded-full px-1.5 py-0.5 font-medium" data-testid="notif-badge">{notif.count}</span>
-                )}
-              </Button>
-              {panelOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-lg shadow-lg z-40 overflow-hidden" data-testid="notif-panel">
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
-                    <span className="text-sm font-semibold">Pembayaran QRIS Baru</span>
-                    {notif.count > 0 && (
-                      <button className="text-xs text-[#0052FF] hover:underline" onClick={markRead} data-testid="btn-notif-read">Tandai dibaca</button>
-                    )}
-                  </div>
-                  {notif.items.length === 0 ? (
-                    <p className="px-4 py-6 text-sm text-slate-500 text-center" data-testid="notif-empty">Belum ada pembayaran baru</p>
-                  ) : (
-                    <ul className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                      {notif.items.map((o) => (
-                        <li key={o.id}>
-                          <button
-                            className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors"
-                            onClick={() => { setPanelOpen(false); markRead(); nav("/admin/pesanan"); }}
-                            data-testid={`notif-item-${o.id}`}
-                          >
-                            <p className="text-sm font-medium font-mono-tabular">{o.nomor_pesanan}</p>
-                            <p className="text-xs text-emerald-600">Lunas via QRIS · {formatRupiah(o.total)}</p>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <Link to="/admin/pembayaran-qris" onClick={() => setPanelOpen(false)} className="block text-center text-xs text-[#0052FF] hover:underline px-4 py-2.5 border-t border-slate-100" data-testid="notif-lihat-semua">Lihat semua pembayaran QRIS</Link>
-                </div>
-              )}
-            </div>
-            <Link to="/" className="hidden md:inline-flex">
-              <Button variant="outline" size="sm" data-testid="btn-view-store">
-                <Store className="w-4 h-4 mr-1.5" /> Lihat Toko
-              </Button>
-            </Link>
             <div className="hidden sm:flex flex-col text-right leading-tight">
               <span className="text-sm font-medium" data-testid="auth-user-name">{user?.nama}</span>
               <span className="text-[11px] uppercase tracking-widest text-slate-500">{user?.role}</span>
