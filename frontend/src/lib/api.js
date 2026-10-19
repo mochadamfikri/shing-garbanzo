@@ -1,11 +1,12 @@
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
 export const API_BASE = `${BACKEND_URL}`;
 
 export const api = axios.create({
   baseURL: `${BACKEND_URL}/api`,
   withCredentials: true,
+  timeout: 10000,
 });
 
 // Fallback: simpan token di localStorage jika cookie cross-site diblokir

@@ -21,7 +21,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    refreshMe();
+    // Timeout safeguard agar tidak pernah stuck di 'Memuat...' lebih dari 1.5 detik
+    const timer = setTimeout(() => {
+      setBootstrapped(true);
+    }, 1500);
+
+    refreshMe().finally(() => clearTimeout(timer));
   }, [refreshMe]);
 
   const login = async (email, password) => {
