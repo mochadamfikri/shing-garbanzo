@@ -32,7 +32,11 @@ def money(value):
 
 class SaleItem(BaseModel):
     unit_id: str = Field(min_length=1)
+    harga_jual_aktual: Optional[int] = Field(default=None, ge=1)
     diskon: int = Field(default=0, ge=0)
+    # Field koreksi modal terbatas jika ada perubahan sebelum jual
+    koreksi_modal: Optional[int] = Field(default=None, ge=0)
+    alasan_koreksi: Optional[str] = Field(default="", max_length=200)
 
 
 class SaleRequest(BaseModel):
@@ -129,26 +133,67 @@ async def create_sale(payload: SaleRequest,
                     if not u:
                         raise HTTPException(404, "Unit tidak ditemukan")
                     if u.get("status_stok") != "TERSEDIA":
-                        raise HTTPException(409, f"{u.get('merek', '')} {u.get('model', '')} tidak tersedia")
-                    harga = money(u.get("harga_jual"))
-                    modal = sum(money(u.get(k)) for k in ("harga_beli", "biaya_reparasi", "biaya_tambahan"))
-                    if harga <= 0 or item.diskon > harga:
-                        raise HTTPException(400, "Harga jual atau diskon tidak valid")
+                        raise HTTPException(409, f"{u.get('merek', '')} {u.get('model', '')} tidak tersedia (status: {u.get('status_stok')})")
+                    
+                    # Tentukan harga jual aktual (dari request POS atau harga_jual unit)
+                    if item.harga_jual_aktual and item.harga_jual_aktual > 0:
+                        harga = item.harga_jual_aktual
+                    else:
+                        harga = money(u.get("harga_jual"))
+                    
+                    if harga <= 0:
+                        raise HTTPException(400, f"Harga jual aktual untuk {u.get('merek')} {u.get('model')} harus ditentukan dan bernilai > 0")
+                    if item.diskon > harga:
+                        raise HTTPException(400, "Diskon tidak boleh melebihi harga jual")
+
+                    # Modal snapshot: gunakan modal terkoreksi jika ada
+                    if item.koreksi_modal is not None and user["role"] in FINANCE:
+                        modal = item.koreksi_modal
+                        modal_reparasi = float(u.get("biaya_reparasi") or 0)
+                        modal_operasional = float(u.get("biaya_operasional") or 0)
+                    else:
+                        modal_beli = float(u.get("harga_beli") or 0)
+                        modal_reparasi = float(u.get("biaya_reparasi") or 0) if u.get("ada_biaya_reparasi") else 0
+                        modal_operasional = float(u.get("biaya_operasional") or 0)
+                        modal = int(modal_beli + modal_reparasi + modal_operasional)
+
                     result = await db.units.update_one(
                         {"id": u["id"], "status_stok": "TERSEDIA"},
                         {"$set": {"status_stok": "TERJUAL", "sold_at": now,
-                                  "sale_id": sale_id, "updated_at": now},
+                                  "sale_id": sale_id, "updated_at": now, "harga_jual": harga},
                          "$push": {"history_status": {"status_stok": "TERJUAL", "at": now,
                                                       "oleh": user["email"], "alasan": nomor}}},
                         session=session)
                     if result.modified_count != 1:
                         raise HTTPException(409, "Stok berubah; silakan ulangi transaksi")
+
+                    # Simpan snapshot lengkap spesifikasi unit ke dalam transaksi
                     lines.append({
-                        "unit_id": u["id"], "merek": u.get("merek", ""),
-                        "model": u.get("model", ""), "varian": u.get("varian", ""),
+                        "unit_id": u["id"],
+                        "merek": u.get("merek", ""),
+                        "model": u.get("model", ""),
+                        "varian": u.get("varian", ""),
+                        "penyimpanan": u.get("penyimpanan", ""),
+                        "warna": u.get("warna", ""),
+                        "kondisi": u.get("kondisi", "BEKAS"),
+                        "part_number": u.get("part_number", "-"),
+                        "model_number": u.get("model_number", "-"),
+                        "eid": u.get("eid", "-"),
+                        "serial_number": u.get("serial_number", "-"),
+                        "imei_1": u.get("imei_1", ""),
+                        "imei_2": u.get("imei_2", ""),
                         "imei_masked": "***********" + str(u.get("imei_1", ""))[-4:],
-                        "harga_jual": harga, "diskon": item.diskon,
-                        "harga_akhir": harga - item.diskon, "modal": modal
+                        "jalur_distributor": u.get("jalur_distributor", "Inter"),
+                        "status_sinyal": u.get("status_sinyal", "Sinyal Aman"),
+                        "kelengkapan": u.get("kelengkapan", "Fullset"),
+                        "addons": u.get("addons", []),
+                        "harga_beli": float(u.get("harga_beli") or 0),
+                        "biaya_reparasi": modal_reparasi,
+                        "biaya_operasional": modal_operasional,
+                        "harga_jual": harga,
+                        "diskon": item.diskon,
+                        "harga_akhir": harga - item.diskon,
+                        "modal": modal
                     })
                     subtotal += harga
                     diskon += item.diskon

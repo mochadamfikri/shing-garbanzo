@@ -20,8 +20,8 @@ import { cn } from "@/lib/utils";
 // 6 Core Navigations
 const NAV_ITEMS = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true, testId: "nav-dashboard" },
-  { to: "/admin/inventaris", label: "Inventaris HP", icon: Smartphone, testId: "nav-inventaris" },
-  { to: "/admin/penjualan", label: "Kasir / POS", icon: ScanLine, testId: "nav-pos" },
+              {to:"/admin/inventaris", label:"Data Unit", icon:Smartphone, testId:"nav-inventaris"},
+              {to:"/admin/penjualan", label:"Penjualan", icon:ScanLine, testId:"nav-pos"},
   { to: "/admin/cek-imei", label: "Cek IMEI", icon: ShieldCheck, testId: "nav-cek-imei" },
   { to: "/admin/laporan", label: "Laporan", icon: BarChart3, testId: "nav-laporan" },
   { to: "/admin/pengaturan", label: "Pengaturan", icon: Settings, testId: "nav-pengaturan" },
@@ -59,7 +59,6 @@ export default function AdminLayout() {
               </div>
               <div className="flex flex-col">
                 <span className="leading-tight text-slate-900 dark:text-white font-extrabold">{settings?.nama_toko || "Sadam Gadget"}</span>
-                <span className="text-[10px] tracking-wider text-blue-600 dark:text-blue-400 font-semibold uppercase">Management Suite</span>
               </div>
             </Link>
           </div>
@@ -122,8 +121,8 @@ export default function AdminLayout() {
           </nav>
 
           <div className="mt-8 px-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
-            <p className="font-semibold text-slate-700 dark:text-slate-300">Sadam Gadget v3</p>
-            <p className="mt-0.5">Admin-Only Management Suite</p>
+            <p className="font-semibold text-slate-700 dark:text-slate-300">Sadam Gadget</p>
+            <p className="mt-0.5">Sistem Manajemen Toko</p>
           </div>
         </aside>
 
@@ -140,20 +139,25 @@ export default function AdminLayout() {
           <Outlet />
         </main>
 
-        {/* Mobile Modern Bottom Navigation (Fixed on Phone Screens) */}
+        {/* Mobile Modern Bottom Navigation (Fixed on Phone Screens - Max 4 Main Menus) */}
         <nav
           aria-label="Navigasi Mobile"
           className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 pb-[env(safe-area-inset-bottom)] shadow-lg"
         >
-          <div className="grid grid-cols-6 h-16 px-1">
-            {NAV_ITEMS.map((n) => (
+          <div className="grid grid-cols-4 h-16 px-1">
+            {[
+              NAV_ITEMS[0], // Dashboard
+              NAV_ITEMS[1], // Data Unit
+              NAV_ITEMS[2], // Penjualan
+              NAV_ITEMS[4], // Laporan
+            ].map((n) => (
               <NavLink
                 key={n.to}
                 end={n.end}
                 to={n.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col gap-1 items-center justify-center text-[10px] font-semibold transition-colors",
+                    "flex flex-col gap-1 items-center justify-center text-[11px] font-semibold transition-colors",
                     isActive
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
@@ -161,7 +165,7 @@ export default function AdminLayout() {
                 }
               >
                 <n.icon className="h-5 w-5" />
-                <span className="truncate max-w-[54px]">{n.label.split(" ")[0]}</span>
+                <span className="truncate">{n.label}</span>
               </NavLink>
             ))}
           </div>

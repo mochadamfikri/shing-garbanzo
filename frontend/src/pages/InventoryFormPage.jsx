@@ -1,401 +1,719 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { api, formatApiErrorDetail } from "@/lib/api";
+import { formatRupiah } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ScanLine, Upload, X, ArrowLeft, Camera } from "lucide-react";
-import ImeiScanner from "@/components/ImeiScanner";
-import { validateImeiClient } from "@/lib/luhn";
-import { formatRupiah, parseRupiahInput } from "@/lib/format";
+import SmartScannerModal from "@/components/SmartScannerModal";
+import {
+  ScanLine,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Smartphone,
+  ShieldCheck,
+  Wallet,
+  Sparkles,
+  Layers,
+  Plus
+} from "lucide-react";
 
-const EMPTY = {
-  merek: "", model: "", varian: "", ram: "", penyimpanan: "", warna: "",
-  jenis_perangkat: "INTER", kondisi: "BARU", grade_fisik: "", kesehatan_baterai: "",
-  imei_1: "", imei_2: "", serial_number: "", kelengkapan: "", catatan_pemeriksaan: "",
-  garansi: "", supplier: "",
-  harga_beli: 0, biaya_reparasi: 0, biaya_tambahan: 0, harga_jual: 0,
-  deskripsi: "",
-  foto_urls: [], video_urls: [],
-  status_stok: "TERSEDIA", status_publikasi: "DRAFT", produk_unggulan: false,
-};
+const JALUR_OPTIONS = ["Inter", "Regist Cukai", "iBox", "Blibli", "Digimap"];
+const SINYAL_OPTIONS = ["Sinyal Aman", "No Signal", "SIM-Lock", "Belum Diperiksa"];
+const KELENGKAPAN_OPTIONS = ["Fullset", "Unit Only"];
+const ASAL_OPTIONS = ["Distributor", "COD", "Tukar Tambah", "Titipan", "Lainnya"];
+const KONDISI_OPTIONS = ["BARU", "BEKAS"];
+const ADDONS_LIST = ["Charger", "Softcase", "Kabel Data", "Tempered Glass", "Dus Pengganti"];
 
 export default function InventoryFormPage({ mode = "create" }) {
-  const { id } = useParams();
   const nav = useNavigate();
-  const [form, setForm] = useState(() => { const imei = new URLSearchParams(window.location.search).get("imei") || ""; return {...EMPTY, imei_1: /^\d{15}$/.test(imei) && mode === "create" ? imei : ""}; });
+  const { id } = useParams();
+
+  // Wizard Stage (1 to 4)
+  const [stage, setStage] = useState(1);
   const [scannerOpen, setScannerOpen] = useState(false);
-  const [scanTarget, setScanTarget] = useState("imei_1");
-  const [imeiCheck1, setImeiCheck1] = useState({ ok: null, message: "" });
-  const [imeiCheck2, setImeiCheck2] = useState({ ok: null, message: "" });
+  const [catalog, setCatalog] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadingImg, setUploadingImg] = useState(false);
-  const [uploadingVid, setUploadingVid] = useState(false);
-  const [err, setErr] = useState("");
 
-  const isEdit = mode === "edit";
+  // Form State
+  const [formData, setFormData] = useState({
+    // Tahap 1: Identitas
+    merek: "Apple",
+    model: "iPhone 15",
+    varian: "",
+    penyimpanan: "128GB",
+    warna: "Pink",
+    ram: "",
+    kondisi: "BEKAS",
+    part_number: "",
+    model_number: "",
+    eid: "",
+    serial_number: "",
+    imei_1: "",
+    imei_2: "",
+    upc: "",
 
+    // Tahap 2: Jalur & Kondisi
+    jalur_distributor: "Inter",
+    status_sinyal: "Sinyal Aman",
+    kelengkapan: "Fullset",
+    addons: [],
+    asal_unit: "Distributor",
+    catatan_pemeriksaan: "",
+
+    // Tahap 3: Keuangan
+    harga_beli: "",
+    ada_biaya_reparasi: false,
+    biaya_reparasi: "",
+    biaya_operasional: "",
+    ongkos_cod: "",
+    ongkos_bensin: "",
+    ongkos_lain: "",
+    harga_jual: "", // Boleh kosong
+
+    // Metadata
+    status_stok: "TERSEDIA",
+    status_publikasi: "TAYANG"
+  });
+
+  // Load master catalog on mount
   useEffect(() => {
-    if (isEdit && id) {
+    api.get("/master-catalog")
+      .then((res) => {
+        if (res.data?.brands) setCatalog(res.data.brands);
+      })
+      .catch(() => {});
+
+    if (mode === "edit" && id) {
+      setLoading(true);
       api.get(`/inventory/${id}`)
-        .then((r) => setForm({ ...EMPTY, ...r.data, kesehatan_baterai: r.data.kesehatan_baterai ?? "" }))
-        .catch((e) => setErr(formatApiErrorDetail(e?.response?.data?.detail) || e.message));
+        .then((res) => {
+          setFormData((prev) => ({ ...prev, ...res.data }));
+        })
+        .catch((e) => toast.error(formatApiErrorDetail(e?.response?.data?.detail) || "Gagal memuat data unit"))
+        .finally(() => setLoading(false));
     }
-  }, [isEdit, id]);
+  }, [mode, id]);
 
-  const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  // Catalog selectors
+  const availableBrands = useMemo(() => catalog.map((c) => c.brand), [catalog]);
+  const currentBrandDoc = useMemo(() => catalog.find((c) => c.brand.toLowerCase() === formData.merek.toLowerCase()), [catalog, formData.merek]);
+  const availableModels = useMemo(() => currentBrandDoc?.models?.map((m) => m.name) || [], [currentBrandDoc]);
+  const currentModelDoc = useMemo(() => currentBrandDoc?.models?.find((m) => m.name.toLowerCase() === formData.model.toLowerCase()), [currentBrandDoc, formData.model]);
+  const availableStorages = useMemo(() => currentModelDoc?.storages || ["64GB", "128GB", "256GB", "512GB", "1TB"], [currentModelDoc]);
+  const availableColors = useMemo(() => currentModelDoc?.colors || ["Black", "White", "Blue", "Natural Titanium"], [currentModelDoc]);
 
-  const totalModal = useMemo(
-    () => Number(form.harga_beli || 0) + Number(form.biaya_reparasi || 0) + Number(form.biaya_tambahan || 0),
-    [form.harga_beli, form.biaya_reparasi, form.biaya_tambahan]
-  );
-  const estimasiLaba = useMemo(() => Number(form.harga_jual || 0) - totalModal, [form.harga_jual, totalModal]);
-
-  const checkImei = async (which) => {
-    const value = form[which];
-    const localCheck = validateImeiClient(value);
-    if (!localCheck.ok) {
-      if (which === "imei_1") setImeiCheck1({ ok: false, message: localCheck.message });
-      else setImeiCheck2({ ok: false, message: localCheck.message });
-      return;
-    }
-    try {
-      const { data } = await api.post("/inventory/validate-imei", { imei: value, exclude_id: isEdit ? id : null });
-      const payload = { ok: data.valid && !data.duplicate, message: data.message };
-      if (which === "imei_1") setImeiCheck1(payload); else setImeiCheck2(payload);
-    } catch (e) {
-      const msg = formatApiErrorDetail(e?.response?.data?.detail) || e.message;
-      if (which === "imei_1") setImeiCheck1({ ok: false, message: msg });
-      else setImeiCheck2({ ok: false, message: msg });
-    }
+  const updateField = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const openScanner = (target) => { setScanTarget(target); setScannerOpen(true); };
-
-  const onFile = async (e, kind) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    const setting = kind === "image" ? setUploadingImg : setUploadingVid;
-    setting(true);
-    const results = [];
-    for (const file of files) {
-      const fd = new FormData();
-      fd.append("file", file);
-      try {
-        const { data } = await api.post(`/uploads/${kind}`, fd, { headers: { "Content-Type": "multipart/form-data" } });
-        results.push(data.url);
-      } catch (err) {
-        toast.error(formatApiErrorDetail(err?.response?.data?.detail) || "Upload gagal");
-      }
-    }
-    if (results.length) {
-      setForm((f) => ({
-        ...f,
-        [kind === "image" ? "foto_urls" : "video_urls"]: [...(f[kind === "image" ? "foto_urls" : "video_urls"] || []), ...results],
-      }));
-      toast.success(`${results.length} berkas diunggah`);
-    }
-    setting(false);
-    e.target.value = "";
+  const handleScanComplete = (fields) => {
+    setFormData((prev) => {
+      const next = { ...prev };
+      if (fields.merek) next.merek = fields.merek;
+      if (fields.model) next.model = fields.model;
+      if (fields.penyimpanan) next.penyimpanan = fields.penyimpanan;
+      if (fields.warna) next.warna = fields.warna;
+      if (fields.part_number) next.part_number = fields.part_number;
+      if (fields.model_number) next.model_number = fields.model_number;
+      if (fields.eid) next.eid = fields.eid;
+      if (fields.serial_number) next.serial_number = fields.serial_number;
+      if (fields.imei_1) next.imei_1 = fields.imei_1;
+      if (fields.imei_2) next.imei_2 = fields.imei_2;
+      if (fields.upc) next.upc = fields.upc;
+      return next;
+    });
+    toast.success("Data hasil scan berhasil dimasukkan ke formulir!");
   };
 
-  const removeMedia = (kind, url) => {
-    setForm((f) => ({
-      ...f,
-      [kind === "image" ? "foto_urls" : "video_urls"]: (f[kind === "image" ? "foto_urls" : "video_urls"] || []).filter((u) => u !== url),
-    }));
+  const toggleAddon = (item) => {
+    setFormData((prev) => {
+      const exists = prev.addons.includes(item);
+      const next = exists ? prev.addons.filter((x) => x !== item) : [...prev.addons, item];
+      return { ...prev, addons: next };
+    });
   };
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setErr("");
-    const check1 = validateImeiClient(form.imei_1);
-    if (!check1.ok) { setErr(`IMEI 1: ${check1.message}`); return; }
-    if (form.imei_2) {
-      const check2 = validateImeiClient(form.imei_2);
-      if (!check2.ok) { setErr(`IMEI 2: ${check2.message}`); return; }
+  // Stage validations
+  const validateStage1 = () => {
+    if (!formData.merek || !formData.model) {
+      toast.error("Merek dan Model unit wajib dipilih");
+      return false;
     }
+    const imei = String(formData.imei_1 || "").trim();
+    if (!/^\d{15}$/.test(imei)) {
+      toast.error("IMEI 1 harus tepat 15 digit angka");
+      return false;
+    }
+    return true;
+  };
 
-    const payload = {
-      ...form,
-      harga_beli: Number(form.harga_beli || 0),
-      biaya_reparasi: Number(form.biaya_reparasi || 0),
-      biaya_tambahan: Number(form.biaya_tambahan || 0),
-      harga_jual: Number(form.harga_jual || 0),
-      kesehatan_baterai: form.kesehatan_baterai === "" ? null : Number(form.kesehatan_baterai),
-    };
-    delete payload.id;
-    delete payload.total_modal;
-    delete payload.estimasi_laba_kotor;
-    delete payload.tanggal_input;
-    delete payload.tanggal_input_fmt;
+  const nextStage = () => {
+    if (stage === 1 && !validateStage1()) return;
+    setStage((s) => Math.min(4, s + 1));
+  };
 
+  const prevStage = () => {
+    setStage((s) => Math.max(1, s - 1));
+  };
+
+  // Total modal calculation
+  const totalModal = useMemo(() => {
+    const beli = Number(formData.harga_beli) || 0;
+    const rep = formData.ada_biaya_reparasi ? (Number(formData.biaya_reparasi) || 0) : 0;
+    const op = Number(formData.biaya_operasional) || 0;
+    return beli + rep + op;
+  }, [formData.harga_beli, formData.ada_biaya_reparasi, formData.biaya_reparasi, formData.biaya_operasional]);
+
+  const handleSubmit = async () => {
     setSaving(true);
     try {
-      if (isEdit) {
-        await api.patch(`/inventory/${id}`, payload);
-        toast.success("Unit berhasil diperbarui");
-      } else {
+      const payload = {
+        ...formData,
+        harga_beli: Number(formData.harga_beli) || 0,
+        biaya_reparasi: formData.ada_biaya_reparasi ? (Number(formData.biaya_reparasi) || 0) : 0,
+        biaya_operasional: Number(formData.biaya_operasional) || 0,
+        harga_jual: formData.harga_jual ? Number(formData.harga_jual) : null
+      };
+
+      if (mode === "create") {
         await api.post("/inventory", payload);
-        toast.success("Unit berhasil ditambahkan");
+        toast.success(`Unit ${formData.merek} ${formData.model} berhasil ditambahkan ke Data Unit!`);
+      } else {
+        await api.patch(`/inventory/${id}`, payload);
+        toast.success(`Unit ${formData.merek} ${formData.model} berhasil diperbarui!`);
       }
       nav("/admin/inventaris");
     } catch (e) {
-      setErr(formatApiErrorDetail(e?.response?.data?.detail) || e.message);
+      toast.error(formatApiErrorDetail(e?.response?.data?.detail) || "Gagal menyimpan unit");
     } finally {
       setSaving(false);
     }
   };
 
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-  const resolveUrl = (u) => (u?.startsWith("http") ? u : `${BACKEND_URL}${u}`);
-
   return (
-    <div className="space-y-5" data-testid="inventory-form-page">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12" data-testid="inventory-form-page">
+      {/* Top Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/admin/inventaris"><Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button></Link>
+          <Link to="/admin/inventaris">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
           <div>
-            <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-tight">{isEdit ? "Edit Unit" : "Tambah Unit HP"}</h1>
-            <p className="text-slate-500 text-sm">Lengkapi data unit, scan IMEI, dan unggah foto/video.</p>
+            <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+              {mode === "create" ? "Tambah Data Unit Baru" : "Edit Data Unit"}
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Tahap {stage} dari 4: {stage === 1 ? "Identitas Perangkat" : stage === 2 ? "Jalur & Kondisi" : stage === 3 ? "Keuangan Unit" : "Review & Simpan"}
+            </p>
           </div>
         </div>
+
+        {stage === 1 && (
+          <Button
+            type="button"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs h-9 shadow-sm"
+            onClick={() => setScannerOpen(true)}
+          >
+            <ScanLine className="w-4 h-4 mr-1.5" /> Smart Device Scan
+          </Button>
+        )}
       </div>
 
-      {err && <p className="text-rose-600 text-sm" data-testid="form-error">{err}</p>}
+      {/* 4-Step Indicator Bar */}
+      <div className="grid grid-cols-4 gap-2">
+        {[
+          { num: 1, label: "Identitas" },
+          { num: 2, label: "Jalur & Sinyal" },
+          { num: 3, label: "Keuangan" },
+          { num: 4, label: "Konfirmasi" }
+        ].map((s) => (
+          <div
+            key={s.num}
+            className={`py-2 px-1 text-center rounded-xl border transition-all ${
+              stage >= s.num
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold"
+                : "border-slate-200 dark:border-slate-800 text-slate-400 text-xs"
+            }`}
+          >
+            <span className="text-[10px] block sm:inline mr-1">{s.num}.</span>
+            <span className="text-xs truncate">{s.label}</span>
+          </div>
+        ))}
+      </div>
 
-      <form className="grid grid-cols-1 lg:grid-cols-3 gap-5" onSubmit={onSubmit}>
-        {/* Kolom kiri: data produk */}
-        <div className="lg:col-span-2 space-y-5">
-          <Card className="p-5">
-            <h2 className="font-heading font-semibold text-lg mb-4">Identitas Produk</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><Label>Merek *</Label><Input required value={form.merek} onChange={(e) => setField("merek", e.target.value)} placeholder="Samsung, Apple, Xiaomi..." data-testid="f-merek" /></div>
-              <div><Label>Model / Tipe *</Label><Input required value={form.model} onChange={(e) => setField("model", e.target.value)} placeholder="Galaxy S23, iPhone 14 Pro..." data-testid="f-model" /></div>
-              <div><Label>Varian</Label><Input value={form.varian} onChange={(e) => setField("varian", e.target.value)} placeholder="Ultra / Plus / Standard" data-testid="f-varian" /></div>
-              <div><Label>Warna</Label><Input value={form.warna} onChange={(e) => setField("warna", e.target.value)} data-testid="f-warna" /></div>
-              <div><Label>RAM</Label><Input value={form.ram} onChange={(e) => setField("ram", e.target.value)} placeholder="8GB" data-testid="f-ram" /></div>
-              <div><Label>Penyimpanan</Label><Input value={form.penyimpanan} onChange={(e) => setField("penyimpanan", e.target.value)} placeholder="256GB" data-testid="f-penyimpanan" /></div>
-              <div>
-                <Label>Jenis Perangkat</Label>
-                <Select value={form.jenis_perangkat} onValueChange={(v) => setField("jenis_perangkat", v)}>
-                  <SelectTrigger data-testid="f-jenis"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="INTER">INTER</SelectItem>
-                    <SelectItem value="RESMI">RESMI</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Kondisi</Label>
-                <Select value={form.kondisi} onValueChange={(v) => setField("kondisi", v)}>
-                  <SelectTrigger data-testid="f-kondisi"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BARU">BARU</SelectItem>
-                    <SelectItem value="BEKAS">BEKAS</SelectItem>
-                    <SelectItem value="REFURBISHED">REFURBISHED</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>Grade Fisik</Label><Input value={form.grade_fisik} onChange={(e) => setField("grade_fisik", e.target.value)} placeholder="A / B / C" data-testid="f-grade" /></div>
-              <div><Label>Kesehatan Baterai (%)</Label><Input type="number" min="0" max="100" value={form.kesehatan_baterai} onChange={(e) => setField("kesehatan_baterai", e.target.value)} data-testid="f-baterai" /></div>
+      {/* ============================================================== */}
+      {/* TAHAP 1: IDENTITAS PERANGKAT                                    */}
+      {/* ============================================================== */}
+      {stage === 1 && (
+        <Card className="p-5 sm:p-6 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <span className="font-heading font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-blue-600" /> Spesifikasi & Nomor Identifikasi Fisik
+            </span>
+            <button
+              type="button"
+              onClick={() => setScannerOpen(true)}
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Isi Otomatis via Scanner
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Brand Dropdown */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Merek / Brand *</Label>
+              <select
+                value={formData.merek}
+                onChange={(e) => updateField("merek", e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
+              >
+                {availableBrands.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
             </div>
-          </Card>
 
-          <Card className="p-5">
-            <h2 className="font-heading font-semibold text-lg mb-4">Identitas Unit (IMEI / SN)</h2>
-            <div className="space-y-4">
-              <div>
-                <Label>IMEI 1 *</Label>
-                <div className="flex gap-2">
-                  <Input
-                    required inputMode="numeric" value={form.imei_1}
-                    onChange={(e) => setField("imei_1", e.target.value.replace(/\D/g, ""))}
-                    onBlur={() => form.imei_1 && checkImei("imei_1")}
-                    className="font-mono-tabular" placeholder="15 digit" data-testid="f-imei1"
-                  />
-                  <Button type="button" variant="outline" onClick={() => openScanner("imei_1")} data-testid="btn-scan-imei1">
-                    <ScanLine className="w-4 h-4 mr-1.5" /> Scan
-                  </Button>
-                </div>
-                {imeiCheck1.message && (
-                  <p className={`text-xs mt-1 ${imeiCheck1.ok ? "text-emerald-600" : "text-rose-600"}`} data-testid="imei1-feedback">
-                    {imeiCheck1.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label>IMEI 2 (opsional)</Label>
-                <div className="flex gap-2">
-                  <Input
-                    inputMode="numeric" value={form.imei_2}
-                    onChange={(e) => setField("imei_2", e.target.value.replace(/\D/g, ""))}
-                    onBlur={() => form.imei_2 && checkImei("imei_2")}
-                    className="font-mono-tabular" placeholder="Jika dual SIM" data-testid="f-imei2"
-                  />
-                  <Button type="button" variant="outline" onClick={() => openScanner("imei_2")} data-testid="btn-scan-imei2">
-                    <ScanLine className="w-4 h-4 mr-1.5" /> Scan
-                  </Button>
-                </div>
-                {imeiCheck2.message && (
-                  <p className={`text-xs mt-1 ${imeiCheck2.ok ? "text-emerald-600" : "text-rose-600"}`} data-testid="imei2-feedback">
-                    {imeiCheck2.message}
-                  </p>
-                )}
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div><Label>Serial Number</Label><Input value={form.serial_number} onChange={(e) => setField("serial_number", e.target.value)} className="font-mono-tabular" data-testid="f-sn" /></div>
-                <div><Label>Garansi</Label><Input value={form.garansi} onChange={(e) => setField("garansi", e.target.value)} placeholder="Resmi 12 bulan / Toko 7 hari" data-testid="f-garansi" /></div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div><Label>Kelengkapan</Label><Input value={form.kelengkapan} onChange={(e) => setField("kelengkapan", e.target.value)} placeholder="Fullset / Unit only" data-testid="f-kelengkapan" /></div>
-                <div><Label>Supplier</Label><Input value={form.supplier} onChange={(e) => setField("supplier", e.target.value)} data-testid="f-supplier" /></div>
-              </div>
-              <div><Label>Catatan Pemeriksaan</Label><Textarea rows={3} value={form.catatan_pemeriksaan} onChange={(e) => setField("catatan_pemeriksaan", e.target.value)} data-testid="f-catatan" /></div>
+            {/* Model Dropdown */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Model Perangkat *</Label>
+              <input
+                list="model-list"
+                value={formData.model}
+                onChange={(e) => updateField("model", e.target.value)}
+                placeholder="Pilih atau ketik model..."
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
+              />
+              <datalist id="model-list">
+                {availableModels.map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
             </div>
-          </Card>
 
-          <Card className="p-5">
-            <h2 className="font-heading font-semibold text-lg mb-4">Media (Foto & Video)</h2>
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Label>Foto Produk</Label>
-                  <label className="inline-flex items-center gap-1.5 cursor-pointer text-sm text-[#0052FF] hover:underline">
-                    <Upload className="w-4 h-4" /> Pilih foto
-                    <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => onFile(e, "image")} data-testid="input-upload-image" />
-                  </label>
-                  <label className="inline-flex items-center gap-1.5 cursor-pointer text-sm text-slate-600 hover:underline">
-                    <Camera className="w-4 h-4" /> Kamera
-                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => onFile(e, "image")} data-testid="input-camera-image" />
-                  </label>
-                  {uploadingImg && <span className="text-xs text-slate-500">Mengunggah...</span>}
-                </div>
-                <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-                  {(form.foto_urls || []).map((u) => (
-                    <div key={u} className="relative group aspect-square rounded-md overflow-hidden bg-slate-100">
-                      <img src={resolveUrl(u)} alt="" className="w-full h-full object-cover" />
-                      <button type="button" onClick={() => removeMedia("image", u)} className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" data-testid={`btn-remove-foto`}>
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* Storage */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Kapasitas Penyimpanan</Label>
+              <select
+                value={formData.penyimpanan}
+                onChange={(e) => updateField("penyimpanan", e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono"
+              >
+                {availableStorages.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
 
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Label>Video Produk</Label>
-                  <label className="inline-flex items-center gap-1.5 cursor-pointer text-sm text-[#0052FF] hover:underline">
-                    <Upload className="w-4 h-4" /> Pilih video
-                    <input type="file" accept="video/*" multiple className="hidden" onChange={(e) => onFile(e, "video")} data-testid="input-upload-video" />
-                  </label>
-                  {uploadingVid && <span className="text-xs text-slate-500">Mengunggah...</span>}
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {(form.video_urls || []).map((u) => (
-                    <div key={u} className="relative group rounded-md overflow-hidden bg-slate-100">
-                      <video src={resolveUrl(u)} controls className="w-full h-32 object-cover" />
-                      <button type="button" onClick={() => removeMedia("video", u)} className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+            {/* Color */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Warna Fisik</Label>
+              <input
+                list="color-list"
+                value={formData.warna}
+                onChange={(e) => updateField("warna", e.target.value)}
+                placeholder="Contoh: Pink, Midnight..."
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
+              />
+              <datalist id="color-list">
+                {availableColors.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
+
+            {/* Part Number */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Part Number / SKU</Label>
+              <Input
+                value={formData.part_number}
+                onChange={(e) => updateField("part_number", e.target.value.toUpperCase())}
+                placeholder="Contoh: MTP13SA/A"
+                className="font-mono text-sm h-10 dark:bg-slate-800 dark:border-slate-700"
+              />
+            </div>
+
+            {/* Model Number */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Model Number</Label>
+              <Input
+                value={formData.model_number}
+                onChange={(e) => updateField("model_number", e.target.value.toUpperCase())}
+                placeholder="Contoh: A3090 / SM-S928B"
+                className="font-mono text-sm h-10 dark:bg-slate-800 dark:border-slate-700"
+              />
+            </div>
+
+            {/* Serial Number */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Nomor Seri (Serial No)</Label>
+              <Input
+                value={formData.serial_number}
+                onChange={(e) => updateField("serial_number", e.target.value.toUpperCase())}
+                placeholder="Contoh: H7XG29V0QP"
+                className="font-mono text-sm h-10 dark:bg-slate-800 dark:border-slate-700"
+              />
+            </div>
+
+            {/* EID (eSIM ID) */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">EID (eSIM)</Label>
+              <Input
+                value={formData.eid}
+                onChange={(e) => updateField("eid", e.target.value.replace(/\D/g, "").slice(0, 32))}
+                placeholder="32 digit angka EID"
+                className="font-mono text-xs h-10 dark:bg-slate-800 dark:border-slate-700"
+              />
+            </div>
+
+            {/* IMEI 1 */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                IMEI 1 (Utama) *
+              </Label>
+              <Input
+                value={formData.imei_1}
+                maxLength={15}
+                onChange={(e) => updateField("imei_1", e.target.value.replace(/\D/g, "").slice(0, 15))}
+                placeholder="15 digit IMEI 1"
+                className="font-mono text-sm h-10 border-blue-400 dark:border-blue-600 dark:bg-slate-800"
+              />
+            </div>
+
+            {/* IMEI 2 */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">IMEI 2 (Opsional)</Label>
+              <Input
+                value={formData.imei_2}
+                maxLength={15}
+                onChange={(e) => updateField("imei_2", e.target.value.replace(/\D/g, "").slice(0, 15))}
+                placeholder="15 digit IMEI 2"
+                className="font-mono text-sm h-10 dark:bg-slate-800 dark:border-slate-700"
+              />
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* ============================================================== */}
+      {/* TAHAP 2: JALUR DISTRIBUTOR & STATUS SINYAL                      */}
+      {/* ============================================================== */}
+      {stage === 2 && (
+        <Card className="p-5 sm:p-6 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
+          <span className="font-heading font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> Jalur Masuk, Kondisi Sinyal & Kelengkapan
+          </span>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Jalur Distributor */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Jalur / Distributor *</Label>
+              <select
+                value={formData.jalur_distributor}
+                onChange={(e) => updateField("jalur_distributor", e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
+              >
+                {JALUR_OPTIONS.map((j) => (
+                  <option key={j} value={j}>{j}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status Sinyal */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Status Sinyal Jaringan *</Label>
+              <select
+                value={formData.status_sinyal}
+                onChange={(e) => updateField("status_sinyal", e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold"
+              >
+                {SINYAL_OPTIONS.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Kelengkapan */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Kelengkapan Paket</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {KELENGKAPAN_OPTIONS.map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => updateField("kelengkapan", k)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
+                      formData.kelengkapan === k
+                        ? "border-blue-600 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-bold"
+                        : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {k}
+                  </button>
+                ))}
               </div>
             </div>
-          </Card>
 
-          <Card className="p-5">
-            <h2 className="font-heading font-semibold text-lg mb-4">Deskripsi Produk</h2>
-            <Textarea rows={5} value={form.deskripsi} onChange={(e) => setField("deskripsi", e.target.value)} placeholder="Deskripsi untuk tampilan toko online..." data-testid="f-deskripsi" />
-          </Card>
-        </div>
+            {/* Asal Unit */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Diperoleh Dari (Asal Unit)</Label>
+              <select
+                value={formData.asal_unit}
+                onChange={(e) => updateField("asal_unit", e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"
+              >
+                {ASAL_OPTIONS.map((a) => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-        {/* Kolom kanan: keuangan + status */}
-        <div className="space-y-5">
-          <Card className="p-5">
-            <h2 className="font-heading font-semibold text-lg mb-4">Keuangan</h2>
-            <div className="space-y-3">
-              {["harga_beli","biaya_reparasi","biaya_tambahan","harga_jual"].map((k) => (
-                <div key={k}>
-                  <Label>{k === "harga_beli" ? "Harga Beli (Modal)" : k === "biaya_reparasi" ? "Biaya Reparasi/Servis" : k === "biaya_tambahan" ? "Biaya Tambahan" : "Harga Jual Rencana"}</Label>
-                  <Input
-                    inputMode="numeric"
-                    value={form[k] ? Number(form[k]).toLocaleString("id-ID") : ""}
-                    onChange={(e) => setField(k, parseRupiahInput(e.target.value))}
-                    placeholder="0"
-                    className="font-mono-tabular"
-                    data-testid={`f-${k}`}
-                  />
-                </div>
-              ))}
-              <div className="pt-3 mt-3 border-t space-y-2">
-                <div className="flex justify-between text-sm"><span className="text-slate-500">Total Modal</span><span className="font-mono-tabular font-medium">{formatRupiah(totalModal)}</span></div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Estimasi Laba Kotor</span>
-                  <span className={`font-mono-tabular font-semibold ${estimasiLaba >= 0 ? "text-emerald-600" : "text-rose-600"}`} data-testid="estimasi-laba">
-                    {formatRupiah(estimasiLaba)}
-                  </span>
-                </div>
+          {/* Add-ons Checkboxes */}
+          <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+              Aksesori Tambahan (Add-ons Opsional)
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {ADDONS_LIST.map((addon) => {
+                const checked = formData.addons.includes(addon);
+                return (
+                  <button
+                    key={addon}
+                    type="button"
+                    onClick={() => toggleAddon(addon)}
+                    className={`py-1.5 px-3 rounded-lg border text-xs font-medium transition-all ${
+                      checked
+                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold"
+                        : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {checked ? "✓ " : "+ "} {addon}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-1.5 pt-2">
+            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Catatan Fisik / Riwayat Servis</Label>
+            <Input
+              value={formData.catatan_pemeriksaan}
+              onChange={(e) => updateField("catatan_pemeriksaan", e.target.value)}
+              placeholder="Contoh: Battery health 98%, TrueTone on, mulus 99%"
+              className="text-xs dark:bg-slate-800 dark:border-slate-700 h-10"
+            />
+          </div>
+        </Card>
+      )}
+
+      {/* ============================================================== */}
+      {/* TAHAP 3: KEUANGAN UNIT                                         */}
+      {/* ============================================================== */}
+      {stage === 3 && (
+        <Card className="p-5 sm:p-6 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
+          <span className="font-heading font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <Wallet className="w-4 h-4 text-indigo-600" /> Modal Pembelian, Reparasi, & Harga Jual
+          </span>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Harga Beli */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Harga Beli (Modal Awal) *
+              </Label>
+              <Input
+                type="number"
+                value={formData.harga_beli}
+                onChange={(e) => updateField("harga_beli", e.target.value)}
+                placeholder="Rp 0"
+                className="font-mono text-base font-bold dark:bg-slate-800 dark:border-slate-700 h-11"
+              />
+            </div>
+
+            {/* Biaya Operasional */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Biaya Operasional (COD / Bensin / Logistik)
+              </Label>
+              <Input
+                type="number"
+                value={formData.biaya_operasional}
+                onChange={(e) => updateField("biaya_operasional", e.target.value)}
+                placeholder="Rp 0"
+                className="font-mono text-sm dark:bg-slate-800 dark:border-slate-700 h-11"
+              />
+            </div>
+          </div>
+
+          {/* Toggle Ada Biaya Reparasi */}
+          <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.ada_biaya_reparasi}
+                onChange={(e) => updateField("ada_biaya_reparasi", e.target.checked)}
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                Ada Biaya Reparasi / Penggantian Part
+              </span>
+            </label>
+
+            {formData.ada_biaya_reparasi && (
+              <div className="pl-6 pt-1 space-y-1.5">
+                <Label className="text-xs text-slate-500">Nominal Biaya Reparasi (Rp)</Label>
+                <Input
+                  type="number"
+                  value={formData.biaya_reparasi}
+                  onChange={(e) => updateField("biaya_reparasi", e.target.value)}
+                  placeholder="Contoh: 350000 (ganti baterai/layar)"
+                  className="font-mono text-sm h-10 dark:bg-slate-800 dark:border-slate-700"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Total Modal Box */}
+          <div className="p-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 flex items-center justify-between">
+            <span className="text-xs font-semibold text-indigo-900 dark:text-indigo-300">
+              Total Beban Modal (HPP):
+            </span>
+            <span className="font-heading font-extrabold text-base text-indigo-700 dark:text-indigo-400 font-mono-tabular">
+              {formatRupiah(totalModal)}
+            </span>
+          </div>
+
+          {/* Harga Jual Rencana (Opsional) */}
+          <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Harga Jual Rencana (Opsional)
+              </Label>
+              <span className="text-[11px] text-slate-400">Boleh dikosongkan & ditentukan saat kasir</span>
+            </div>
+            <Input
+              type="number"
+              value={formData.harga_jual}
+              onChange={(e) => updateField("harga_jual", e.target.value)}
+              placeholder="Kosongkan jika belum ditentukan"
+              className="font-mono text-sm h-11 dark:bg-slate-800 dark:border-slate-700"
+            />
+          </div>
+        </Card>
+      )}
+
+      {/* ============================================================== */}
+      {/* TAHAP 4: REVIEW & KONFIRMASI                                   */}
+      {/* ============================================================== */}
+      {stage === 4 && (
+        <Card className="p-5 sm:p-6 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
+          <span className="font-heading font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <CheckCircle2 className="w-4 h-4 text-blue-600" /> Konfirmasi Seluruh Data Unit
+          </span>
+
+          <div className="space-y-3 text-xs">
+            {/* Identity Summary */}
+            <div className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Unit Fisik</span>
+              <p className="text-base font-bold text-slate-900 dark:text-white">
+                {formData.merek} {formData.model} ({formData.penyimpanan} - {formData.warna})
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-300 font-mono mt-2">
+                <p>IMEI 1: <b>{formData.imei_1}</b></p>
+                {formData.imei_2 && <p>IMEI 2: <b>{formData.imei_2}</b></p>}
+                {formData.serial_number && <p>Serial: <b>{formData.serial_number}</b></p>}
+                {formData.part_number && <p>Part No: <b>{formData.part_number}</b></p>}
+                {formData.model_number && <p>Model No: <b>{formData.model_number}</b></p>}
+                {formData.eid && <p className="truncate">EID: <b>{formData.eid}</b></p>}
               </div>
             </div>
-          </Card>
 
-          <Card className="p-5">
-            <h2 className="font-heading font-semibold text-lg mb-4">Status</h2>
-            <div className="space-y-3">
-              <div>
-                <Label>Status Stok</Label>
-                <Select value={form.status_stok} onValueChange={(v) => setField("status_stok", v)}>
-                  <SelectTrigger data-testid="f-status-stok"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["TERSEDIA","HOLD","TERJUAL","SERVIS","DIARSIPKAN"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+            {/* Condition & Logistics */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Jalur & Sinyal</span>
+                <p className="font-semibold text-slate-800 dark:text-slate-200 mt-1">{formData.jalur_distributor}</p>
+                <p className="text-emerald-600 font-medium">{formData.status_sinyal}</p>
               </div>
-              {form.status_stok === "HOLD" && (
-                <div>
-                  <Label>Alasan HOLD</Label>
-                  <Input value={form.alasan_hold || ""} onChange={(e) => setField("alasan_hold", e.target.value)} data-testid="f-alasan-hold" />
+
+              <div className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Kelengkapan</span>
+                <p className="font-semibold text-slate-800 dark:text-slate-200 mt-1">{formData.kelengkapan}</p>
+                <p className="text-slate-500">{formData.addons.length ? formData.addons.join(", ") : "Tanpa add-ons"}</p>
+              </div>
+            </div>
+
+            {/* Finance Review */}
+            <div className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Kalkulasi Modal</span>
+              <div className="flex justify-between font-mono">
+                <span>Harga Beli (Modal):</span>
+                <span>{formatRupiah(formData.harga_beli || 0)}</span>
+              </div>
+              {formData.ada_biaya_reparasi && (
+                <div className="flex justify-between font-mono text-purple-600">
+                  <span>Biaya Reparasi:</span>
+                  <span>+{formatRupiah(formData.biaya_reparasi || 0)}</span>
                 </div>
               )}
-              <div>
-                <Label>Status Publikasi</Label>
-                <Select value={form.status_publikasi} onValueChange={(v) => setField("status_publikasi", v)}>
-                  <SelectTrigger data-testid="f-status-pub"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["DRAFT","TAYANG","DISEMBUNYIKAN","DIARSIPKAN"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+              {Boolean(formData.biaya_operasional) && (
+                <div className="flex justify-between font-mono text-slate-500">
+                  <span>Biaya Operasional:</span>
+                  <span>+{formatRupiah(formData.biaya_operasional || 0)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-sm pt-1 border-t border-slate-200 dark:border-slate-700">
+                <span>Total Modal (HPP):</span>
+                <span className="text-indigo-600 dark:text-indigo-400 font-mono-tabular">{formatRupiah(totalModal)}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="unggulan">Produk Unggulan</Label>
-                <Switch id="unggulan" checked={!!form.produk_unggulan} onCheckedChange={(v) => setField("produk_unggulan", v)} data-testid="f-unggulan" />
+              <div className="flex justify-between text-xs pt-1 text-slate-500">
+                <span>Harga Jual Rencana:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">
+                  {formData.harga_jual ? formatRupiah(formData.harga_jual) : "Belum Ditentukan"}
+                </span>
               </div>
             </div>
-          </Card>
+          </div>
+        </Card>
+      )}
 
-          <Button type="submit" className="w-full bg-[#0052FF] hover:bg-[#0040CC]" disabled={saving} data-testid="btn-submit-unit">
-            {saving ? "Menyimpan..." : isEdit ? "Simpan Perubahan" : "Simpan Unit"}
+      {/* Navigation Buttons between Stages */}
+      <div className="flex items-center justify-between pt-2">
+        {stage > 1 ? (
+          <Button variant="outline" onClick={prevStage} className="h-10 text-xs">
+            <ArrowLeft className="w-4 h-4 mr-1.5" /> Kembali
           </Button>
-        </div>
-      </form>
+        ) : <div />}
 
-      <ImeiScanner
-        open={scannerOpen}
-        onOpenChange={setScannerOpen}
-        onCapture={(imei) => {
-          setField(scanTarget, imei);
-          setTimeout(() => checkImei(scanTarget), 100);
-        }}
+        {stage < 4 ? (
+          <Button onClick={nextStage} className="h-10 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-5">
+            Lanjut ke Tahap {stage + 1} <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 shadow-md shadow-emerald-500/20"
+          >
+            {saving ? "Menyimpan Unit..." : "Konfirmasi & Simpan ke Data Unit"}
+          </Button>
+        )}
+      </div>
+
+      {/* Smart Device Scanner Modal */}
+      <SmartScannerModal
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onScanComplete={handleScanComplete}
       />
     </div>
   );

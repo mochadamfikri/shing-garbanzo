@@ -1,6 +1,6 @@
 """Pydantic schemas untuk request/response. Dokumen Mongo disimpan dengan field 'id' (uuid)."""
 from datetime import datetime
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 # ---------- USER ----------
@@ -46,26 +46,40 @@ class UnitHPCreate(BaseModel):
     ram: Optional[str] = ""
     penyimpanan: Optional[str] = ""
     warna: Optional[str] = ""
-    jenis_perangkat: str = "INTER"
-    kondisi: str = "BARU"
-    grade_fisik: Optional[str] = ""
-    kesehatan_baterai: Optional[int] = None
+    # Tahap 1 identifiers
+    part_number: Optional[str] = ""
+    model_number: Optional[str] = ""
+    eid: Optional[str] = ""
+    serial_number: Optional[str] = ""
     imei_1: str
     imei_2: Optional[str] = ""
-    serial_number: Optional[str] = ""
-    kelengkapan: Optional[str] = ""
+    upc: Optional[str] = ""
+    kondisi: str = "BEKAS"
+    grade_fisik: Optional[str] = ""
+    kesehatan_baterai: Optional[int] = None
+    
+    # Tahap 2: Jalur, Sinyal, Kelengkapan & Asal Unit
+    jalur_distributor: str = "Inter"  # Inter, Regist Cukai, iBox, Blibli, Digimap
+    status_sinyal: str = "Sinyal Aman"  # Sinyal Aman, No Signal, SIM-Lock, Belum Diperiksa
+    kelengkapan: str = "Fullset"  # Fullset, Unit Only
+    addons: List[str] = Field(default_factory=list)  # Charger, Softcase, Kabel, dll.
+    asal_unit: str = "Distributor"  # COD, Distributor, Tukar Tambah, Titipan, Lainnya
     catatan_pemeriksaan: Optional[str] = ""
-    garansi: Optional[str] = ""
-    supplier: Optional[str] = ""
+    
+    # Tahap 3: Keuangan
     harga_beli: float = 0
+    ada_biaya_reparasi: bool = False
     biaya_reparasi: float = 0
-    biaya_tambahan: float = 0
-    harga_jual: float = 0
+    biaya_operasional: float = 0  # Total operasional
+    rincian_operasional: Optional[Dict[str, float]] = Field(default_factory=dict)  # ongkos_cod, bensin, dll
+    harga_jual: Optional[float] = None  # Boleh None / Kosong
+    
+    # Metadata
     deskripsi: Optional[str] = ""
     foto_urls: List[str] = Field(default_factory=list)
     video_urls: List[str] = Field(default_factory=list)
     status_stok: str = "TERSEDIA"
-    status_publikasi: str = "DRAFT"
+    status_publikasi: str = "TAYANG"
     produk_unggulan: bool = False
 
 

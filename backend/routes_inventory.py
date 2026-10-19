@@ -77,10 +77,6 @@ async def create_unit(payload: UnitHPCreate,
                       user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))):
     from server import db
     # Validasi
-    if payload.jenis_perangkat not in JENIS_PERANGKAT:
-        raise HTTPException(status_code=400, detail="Jenis perangkat harus INTER atau RESMI")
-    if payload.kondisi not in KONDISI:
-        raise HTTPException(status_code=400, detail="Kondisi harus BARU/BEKAS/REFURBISHED")
     if payload.status_stok not in STATUS_STOK:
         raise HTTPException(status_code=400, detail="Status stok tidak valid")
     if payload.status_publikasi not in STATUS_PUBLIKASI:
@@ -93,7 +89,7 @@ async def create_unit(payload: UnitHPCreate,
         if not ok2:
             raise HTTPException(status_code=400, detail=f"IMEI 2: {msg2}")
     if payload.status_stok == "TERJUAL":
-        raise HTTPException(status_code=400, detail="Penjualan harus melalui transaksi POS atau pesanan online")
+        raise HTTPException(status_code=400, detail="Penjualan harus melalui menu Penjualan")
     if payload.imei_2 and payload.imei_1 == payload.imei_2:
         raise HTTPException(status_code=400, detail="IMEI 1 dan IMEI 2 tidak boleh sama")
     # Cek duplikat
@@ -104,6 +100,13 @@ async def create_unit(payload: UnitHPCreate,
         raise HTTPException(status_code=409, detail="IMEI sudah terdaftar di sistem")
 
     unit = payload.model_dump()
+    # Normalize total modal: harga_beli + biaya_reparasi + biaya_operasional
+    tot_modal = float(unit.get("harga_beli") or 0)
+    if unit.get("ada_biaya_reparasi"):
+        tot_modal += float(unit.get("biaya_reparasi") or 0)
+    tot_modal += float(unit.get("biaya_operasional") or 0)
+    unit["total_modal"] = tot_modal
+
     unit["id"] = str(uuid.uuid4())
     unit["tanggal_input"] = now_utc().isoformat()
     unit["dibuat_oleh"] = user["email"]

@@ -47,7 +47,7 @@ export default function LoginPage() {
           Sadam Gadget
         </h1>
         <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-          Admin & Management Suite Login
+          Masuk ke Sistem Manajemen Toko
         </p>
       </div>
 

@@ -30,9 +30,30 @@ async def summary(user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))
     servis = by_status.get("SERVIS", {}).get("count", 0)
     arsip = by_status.get("DIARSIPKAN", {}).get("count", 0)
 
+    # Modal stok aktif (hanya unit yang belum terjual)
     nilai_modal_stok = by_status.get("TERSEDIA", {}).get("modal", 0) + by_status.get("HOLD", {}).get("modal", 0)
     nilai_jual_stok = by_status.get("TERSEDIA", {}).get("nilai_jual", 0) + by_status.get("HOLD", {}).get("nilai_jual", 0)
     estimasi_laba_potensial = nilai_jual_stok - nilai_modal_stok
+
+    # Realisasi Penjualan & Laba Riil dari POS
+    pos_pipe = [
+        {"$match": {"status": "SELESAI"}},
+        {"$group": {
+            "_id": None,
+            "total_omzet": {"$sum": "$penjualan_bersih"},
+            "total_hpp": {"$sum": "$hpp"},
+            "total_laba_kotor": {"$sum": "$laba_kotor"},
+            "total_laba_bersih": {"$sum": "$laba_bersih"},
+            "total_transaksi": {"$sum": 1}
+        }}
+    ]
+    pos_res = await db.pos_sales.aggregate(pos_pipe).to_list(1)
+    pos_stat = pos_res[0] if pos_res else {}
+
+    total_omzet = pos_stat.get("total_omzet", 0)
+    total_hpp_terjual = pos_stat.get("total_hpp", 0)
+    total_laba_kotor_terjual = pos_stat.get("total_laba_kotor", 0)
+    total_laba_bersih_terjual = pos_stat.get("total_laba_bersih", 0)
 
     # Produk terlaris (TERJUAL) by merek
     merek_pipe = [
@@ -54,6 +75,10 @@ async def summary(user=Depends(require_roles(ROLE_OWNER, ROLE_ADMIN, ROLE_STAF))
         "nilai_modal_stok": 0 if hide_finance else nilai_modal_stok,
         "nilai_jual_stok": nilai_jual_stok,
         "estimasi_laba_potensial": 0 if hide_finance else estimasi_laba_potensial,
+        "total_omzet": total_omzet,
+        "total_hpp_terjual": 0 if hide_finance else total_hpp_terjual,
+        "total_laba_kotor_terjual": 0 if hide_finance else total_laba_kotor_terjual,
+        "total_laba_bersih_terjual": 0 if hide_finance else total_laba_bersih_terjual,
         "performa_merek": performa_merek,
     }
     return data

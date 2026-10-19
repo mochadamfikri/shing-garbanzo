@@ -70,6 +70,37 @@ export default function DashboardPage() {
   const [reportData, setReportData] = useState(null);
   const [loadingReport, setLoadingReport] = useState(false);
 
+  // Periodic metrics summary directly on cards
+  const [periodSummaries, setPeriodSummaries] = useState({
+    daily: null,
+    weekly: null,
+    monthly: null
+  });
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      api.get("/dashboard/summary"),
+      api.get("/inventory"),
+      api.get("/pos/sales"),
+      api.get("/reports-v3/period?period=daily"),
+      api.get("/reports-v3/period?period=weekly"),
+      api.get("/reports-v3/period?period=monthly")
+    ])
+      .then(([resSummary, resInv, resSales, resDaily, resWeekly, resMonthly]) => {
+        setData(resSummary.data);
+        setInventory(resInv.data);
+        setSales(resSales.data);
+        setPeriodSummaries({
+          daily: resDaily.data?.summary,
+          weekly: resWeekly.data?.summary,
+          monthly: resMonthly.data?.summary
+        });
+      })
+      .catch((e) => setErr(formatApiErrorDetail(e?.response?.data?.detail) || e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
   const openReport = async (p) => {
     setReportModalPeriod(p);
     setLoadingReport(true);
@@ -86,22 +117,6 @@ export default function DashboardPage() {
   const downloadExcel = (p) => {
     window.open(`${process.env.REACT_APP_BACKEND_URL || ""}/api/reports-v3/export-excel?period=${p}`, "_blank");
   };
-
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      api.get("/dashboard/summary"),
-      api.get("/inventory"),
-      api.get("/pos/sales")
-    ])
-      .then(([resSummary, resInv, resSales]) => {
-        setData(resSummary.data);
-        setInventory(resInv.data);
-        setSales(resSales.data);
-      })
-      .catch((e) => setErr(formatApiErrorDetail(e?.response?.data?.detail) || e.message))
-      .finally(() => setLoading(false));
-  }, []);
 
   const showFin = ["owner", "admin"].includes(user?.role);
 
@@ -160,11 +175,11 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
                   Daily Report
                 </span>
-                <p className="font-heading font-extrabold text-lg mt-2 text-slate-900 dark:text-white">
-                  Laporan Hari Ini
+                <p className="font-heading font-extrabold text-2xl mt-1.5 font-mono-tabular text-slate-900 dark:text-white">
+                  {formatRupiah(periodSummaries.daily?.total_omzet ?? 0)}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Rekap kasir & unit terjual harian
+                  {periodSummaries.daily?.total_unit_terjual ?? 0} Unit Terjual Hari Ini
                 </p>
               </div>
               <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center">
@@ -172,7 +187,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center">
-              Buka Detail & Excel <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              Laba Bersih: {formatRupiah(periodSummaries.daily?.laba_bersih ?? 0)} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </div>
           </Card>
 
@@ -185,11 +200,11 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
                   Weekly Report
                 </span>
-                <p className="font-heading font-extrabold text-lg mt-2 text-slate-900 dark:text-white">
-                  Laporan 7 Hari Terakhir
+                <p className="font-heading font-extrabold text-2xl mt-1.5 font-mono-tabular text-slate-900 dark:text-white">
+                  {formatRupiah(periodSummaries.weekly?.total_omzet ?? 0)}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Tren omzet & laba mingguan
+                  {periodSummaries.weekly?.total_unit_terjual ?? 0} Unit (7 Hari Terakhir)
                 </p>
               </div>
               <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -197,7 +212,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center">
-              Buka Detail & Excel <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              Laba Bersih: {formatRupiah(periodSummaries.weekly?.laba_bersih ?? 0)} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </div>
           </Card>
 
@@ -210,11 +225,11 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
                   Monthly Report
                 </span>
-                <p className="font-heading font-extrabold text-lg mt-2 text-slate-900 dark:text-white">
-                  Laporan Bulan Berjalan
+                <p className="font-heading font-extrabold text-2xl mt-1.5 font-mono-tabular text-slate-900 dark:text-white">
+                  {formatRupiah(periodSummaries.monthly?.total_omzet ?? 0)}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Akumulasi bulanan & profit bersih
+                  {periodSummaries.monthly?.total_unit_terjual ?? 0} Unit (Bulan Berjalan)
                 </p>
               </div>
               <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
@@ -222,7 +237,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex items-center">
-              Buka Detail & Excel <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+              Laba Bersih: {formatRupiah(periodSummaries.monthly?.laba_bersih ?? 0)} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </div>
           </Card>
         </div>
@@ -277,37 +292,58 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-2.5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Metrik Nilai & Keuangan
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Ringkasan Keuangan Penjualan (Riil dari Kasir)
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <ClickableStatCard
               icon={Wallet}
-              label="Modal Stok Aktif"
-              value={formatRupiah(data?.nilai_modal_stok ?? 0)}
-              subtitle="Nilai beli unit tersedia"
-              testId="stat-modal"
+              label="Total Omzet Penjualan"
+              value={formatRupiah(data?.total_omzet ?? 0)}
+              subtitle="Total kas diterima dari kasir POS"
+              testId="stat-omzet"
+              colorClass="bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+              onClick={() => openReport("monthly")}
+            />
+            <ClickableStatCard
+              icon={TrendingUp}
+              label="Total Modal Terjual (HPP)"
+              value={formatRupiah(data?.total_hpp_terjual ?? 0)}
+              subtitle="Modal unit yang telah terjual"
+              testId="stat-hpp"
               colorClass="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400"
-              onClick={() => setActiveModal("modal")}
+              onClick={() => openReport("monthly")}
             />
             <ClickableStatCard
               icon={TrendingUp}
-              label="Estimasi Nilai Jual"
-              value={formatRupiah(data?.nilai_jual_stok ?? 0)}
-              subtitle="Potensi perputaran kas"
-              testId="stat-nilai-jual"
-              colorClass="bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400"
-              onClick={() => setActiveModal("modal")}
-            />
-            <ClickableStatCard
-              icon={TrendingUp}
-              label="Potensi Laba Kotor"
-              value={formatRupiah(data?.estimasi_laba_potensial ?? 0)}
-              subtitle="Margin keuntungan stok"
-              testId="stat-laba-potensial"
+              label="Laba Bersih Riil"
+              value={formatRupiah(data?.total_laba_bersih_terjual ?? 0)}
+              subtitle="Laba bersih kasir setelah biaya"
+              testId="stat-laba-bersih"
               colorClass="bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400"
-              onClick={() => setActiveModal("modal")}
+              onClick={() => openReport("monthly")}
             />
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
+              <span className="text-slate-400 block uppercase font-bold text-[10px]">Modal Stok Tersedia</span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-200 font-mono mt-0.5 block">
+                {formatRupiah(data?.nilai_modal_stok ?? 0)}
+              </span>
+            </div>
+            <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
+              <span className="text-slate-400 block uppercase font-bold text-[10px]">Estimasi Nilai Jual Stok</span>
+              <span className="text-base font-bold text-slate-800 dark:text-slate-200 font-mono mt-0.5 block">
+                {formatRupiah(data?.nilai_jual_stok ?? 0)}
+              </span>
+            </div>
+            <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
+              <span className="text-slate-400 block uppercase font-bold text-[10px]">Potensi Laba Stok Aktif</span>
+              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
+                {formatRupiah(data?.estimasi_laba_potensial ?? 0)}
+              </span>
+            </div>
           </div>
         </div>
       )}
