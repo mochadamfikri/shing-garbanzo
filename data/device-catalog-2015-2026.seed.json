@@ -1060,6 +1060,30 @@
       ]
     },
     {
+      "brand": "nubia",
+      "is_default": false,
+      "models": [
+        {
+          "name": "nubia Z50"
+        },
+        {
+          "name": "nubia Z60 Ultra"
+        },
+        {
+          "name": "nubia Z70 Ultra"
+        },
+        {
+          "name": "nubia Flip 5G"
+        },
+        {
+          "name": "nubia Neo 2 5G"
+        },
+        {
+          "name": "nubia Neo 3 5G"
+        }
+      ]
+    },
+    {
       "brand": "OnePlus",
       "is_default": false,
       "models": [
@@ -1599,6 +1623,30 @@
         },
         {
           "name": "GT 7"
+        }
+      ]
+    },
+    {
+      "brand": "REDMAGIC",
+      "is_default": false,
+      "models": [
+        {
+          "name": "REDMAGIC 5G"
+        },
+        {
+          "name": "REDMAGIC 6"
+        },
+        {
+          "name": "REDMAGIC 7"
+        },
+        {
+          "name": "REDMAGIC 8 Pro"
+        },
+        {
+          "name": "REDMAGIC 9 Pro"
+        },
+        {
+          "name": "REDMAGIC 10 Pro"
         }
       ]
     },
@@ -2575,7 +2623,7 @@
       ]
     },
     {
-      "brand": "ZTE / nubia",
+      "brand": "ZTE",
       "is_default": false,
       "models": [
         {
@@ -2598,42 +2646,6 @@
         },
         {
           "name": "ZTE Blade V50"
-        },
-        {
-          "name": "nubia Z50"
-        },
-        {
-          "name": "nubia Z60 Ultra"
-        },
-        {
-          "name": "nubia Z70 Ultra"
-        },
-        {
-          "name": "nubia Flip 5G"
-        },
-        {
-          "name": "nubia Neo 2 5G"
-        },
-        {
-          "name": "nubia Neo 3 5G"
-        },
-        {
-          "name": "REDMAGIC 5G"
-        },
-        {
-          "name": "REDMAGIC 6"
-        },
-        {
-          "name": "REDMAGIC 7"
-        },
-        {
-          "name": "REDMAGIC 8 Pro"
-        },
-        {
-          "name": "REDMAGIC 9 Pro"
-        },
-        {
-          "name": "REDMAGIC 10 Pro"
         }
       ]
     }
