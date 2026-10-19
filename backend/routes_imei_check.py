@@ -4,6 +4,7 @@ Credentials live exclusively in the backend env. We never infer blocked/register
 status from a provider failure; only a returned result may supply an IMEI state.
 """
 import logging
+import math
 import os
 import re
 from typing import Literal
@@ -119,11 +120,14 @@ async def _availability(service_code):
             service = _json(service_res).get("data")
             if not isinstance(service, dict):
                 raise HTTPException(503, {"state": "provider_unavailable", "message": TEMPORARY_TEXT})
-            rule = service.get("rule") or {}
+            rule = service.get("rule")
+            if not isinstance(rule, dict):
+                raise HTTPException(503, {"state": "provider_unavailable", "message": TEMPORARY_TEXT})
             price = rule.get("unit_price")
             if (not isinstance(price, (int, float)) or isinstance(price, bool)
                     or price < 0 or not isinstance(balance, (int, float))
-                    or isinstance(balance, bool) or balance < 0):
+                    or isinstance(balance, bool) or balance < 0
+                    or not math.isfinite(price) or not math.isfinite(balance)):
                 raise HTTPException(503, {"state": "provider_unavailable", "message": TEMPORARY_TEXT})
             if not service.get("is_active", False):
                 return {"state": "provider_unavailable", "message": TEMPORARY_TEXT,

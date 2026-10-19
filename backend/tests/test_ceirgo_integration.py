@@ -104,3 +104,21 @@ def test_bad_imei_rejected_without_provider_contact(monkeypatch):
                                       {"id": "test-user"}))
     assert exc.value.status_code == 422
     assert not requests
+
+@pytest.mark.parametrize('balance,price', [(float('nan'), 1500), (2500, float('nan')), (float('inf'), 1500), (2500, float('inf'))])
+def test_nonfinite_amounts_fail_closed(monkeypatch, balance, price):
+    mock_client(monkeypatch, balance=balance, price=price)
+    # Inject decoded malformed provider values without relying on JSON encoding NaN.
+    def decoded(response):
+        if response.request.url.path == '/api/wallet/snap':
+            return {'balance': balance}
+        return {'data': {'is_active': True, 'rule': {'unit_price': price}}}
+    mock_client(monkeypatch, balance=2500, price=1500)
+    monkeypatch.setattr(mod, '_json', decoded)
+    assert asyncio.run(mod._availability('cek_imei'))['state'] == 'provider_unavailable'
+
+
+def test_malformed_rule_fails_closed(monkeypatch):
+    mock_client(monkeypatch, balance=2500)
+    monkeypatch.setattr(mod, '_json', lambda response: {'balance': 2500} if response.request.url.path == '/api/wallet/snap' else {'data': {'is_active': True, 'rule': 'invalid'}})
+    assert asyncio.run(mod._availability('cek_imei'))['state'] == 'provider_unavailable'
