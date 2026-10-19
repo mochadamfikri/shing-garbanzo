@@ -135,16 +135,18 @@ export default function ImeiScanner({ open, onOpenChange, onCapture }) {
           </div>
 
           <div>
-            <Label htmlFor="imei-captured">Hasil / Koreksi Manual</Label>
+            <Label htmlFor="imei-captured" className="text-xs font-semibold">Hasil / Koreksi Manual</Label>
             <Input
               id="imei-captured"
               inputMode="numeric"
               autoComplete="off"
               value={imei}
+              readOnly={!scanning && !imei}
+              onFocus={(e) => e.target.removeAttribute("readonly")}
               onChange={(e) => setImei(e.target.value.replace(/\D/g, ""))}
-              placeholder="Masukkan atau koreksi IMEI"
+              placeholder="Hasil scan akan muncul di sini"
               data-testid="imei-captured-input"
-              className="font-mono-tabular"
+              className="font-mono-tabular text-sm h-11 mt-1"
             />
             {error && <p className="text-sm text-rose-600 mt-1" data-testid="imei-scan-error">{error}</p>}
           </div>

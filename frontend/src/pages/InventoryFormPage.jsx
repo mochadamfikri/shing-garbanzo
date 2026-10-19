@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import SmartScannerModal from "@/components/SmartScannerModal";
+import ImeiScanner from "@/components/ImeiScanner";
 import {
   ScanLine,
   ArrowLeft,
@@ -35,6 +36,8 @@ export default function InventoryFormPage({ mode = "create" }) {
   // Wizard Stage (1 to 4)
   const [stage, setStage] = useState(1);
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [singleScannerOpen, setSingleScannerOpen] = useState(false);
+  const [targetImeiField, setTargetImeiField] = useState("imei_1");
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -386,25 +389,57 @@ export default function InventoryFormPage({ mode = "create" }) {
               <Label className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                 IMEI 1 (Utama) *
               </Label>
-              <Input
-                value={formData.imei_1}
-                maxLength={15}
-                onChange={(e) => updateField("imei_1", e.target.value.replace(/\D/g, "").slice(0, 15))}
-                placeholder="15 digit IMEI 1"
-                className="font-mono text-sm h-10 border-blue-400 dark:border-blue-600 dark:bg-slate-800"
-              />
+              <div className="flex gap-1.5">
+                <Input
+                  value={formData.imei_1}
+                  maxLength={15}
+                  inputMode="numeric"
+                  onChange={(e) => updateField("imei_1", e.target.value.replace(/\D/g, "").slice(0, 15))}
+                  placeholder="15 digit IMEI 1"
+                  className="font-mono text-sm h-11 border-blue-400 dark:border-blue-600 dark:bg-slate-800"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-11 w-11 shrink-0 border-blue-300 dark:border-blue-800"
+                  onClick={() => {
+                    setTargetImeiField("imei_1");
+                    setSingleScannerOpen(true);
+                  }}
+                  aria-label="Scan Barcode IMEI 1"
+                >
+                  <ScanLine className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </Button>
+              </div>
             </div>
 
             {/* IMEI 2 */}
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">IMEI 2 (Opsional)</Label>
-              <Input
-                value={formData.imei_2}
-                maxLength={15}
-                onChange={(e) => updateField("imei_2", e.target.value.replace(/\D/g, "").slice(0, 15))}
-                placeholder="15 digit IMEI 2"
-                className="font-mono text-sm h-10 dark:bg-slate-800 dark:border-slate-700"
-              />
+              <div className="flex gap-1.5">
+                <Input
+                  value={formData.imei_2}
+                  maxLength={15}
+                  inputMode="numeric"
+                  onChange={(e) => updateField("imei_2", e.target.value.replace(/\D/g, "").slice(0, 15))}
+                  placeholder="15 digit IMEI 2"
+                  className="font-mono text-sm h-11 dark:bg-slate-800 dark:border-slate-700"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-11 w-11 shrink-0 dark:border-slate-700"
+                  onClick={() => {
+                    setTargetImeiField("imei_2");
+                    setSingleScannerOpen(true);
+                  }}
+                  aria-label="Scan Barcode IMEI 2"
+                >
+                  <ScanLine className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                </Button>
+              </div>
             </div>
           </div>
         </Card>
@@ -722,6 +757,16 @@ export default function InventoryFormPage({ mode = "create" }) {
         isOpen={scannerOpen}
         onClose={() => setScannerOpen(false)}
         onScanComplete={handleScanComplete}
+      />
+
+      {/* Single IMEI Barcode Camera Scanner */}
+      <ImeiScanner
+        open={singleScannerOpen}
+        onOpenChange={setSingleScannerOpen}
+        onCapture={(scannedImei) => {
+          updateField(targetImeiField, scannedImei);
+          toast.success(`IMEI berhasil diisi: ${scannedImei}`);
+        }}
       />
     </div>
   );

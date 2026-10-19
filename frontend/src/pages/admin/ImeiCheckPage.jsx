@@ -181,6 +181,7 @@ export default function ImeiCheckPage() {
         <div className="flex gap-2">
           <Input id="ceir-imei" inputMode="numeric" autoComplete="off" maxLength={15}
             placeholder="15 digit IMEI" data-testid="imei-check-input"
+            autoFocus={false}
             value={imei} onChange={(e) => changeImei(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } }} />
           <Button type="button" variant="outline" aria-label="Scan IMEI dengan kamera"
