@@ -460,7 +460,18 @@
 - Phone (3a) Pro
 - Phone (3)
 
-## 16. OnePlus
+## 16. nubia
+
+### nubia
+
+- nubia Z50
+- nubia Z60 Ultra
+- nubia Z70 Ultra
+- nubia Flip 5G
+- nubia Neo 2 5G
+- nubia Neo 3 5G
+
+## 17. OnePlus
 
 ### Number
 
@@ -503,7 +514,7 @@
 - Nord CE 3
 - Nord CE 4
 
-## 17. OPPO
+## 18. OPPO
 
 ### A
 
@@ -582,7 +593,7 @@
 - Find N3 Flip
 - Find N5
 
-## 18. POCO
+## 19. POCO
 
 ### F
 
@@ -623,7 +634,7 @@
 - POCO C65
 - POCO C75
 
-## 19. realme
+## 20. realme
 
 ### Number
 
@@ -677,7 +688,18 @@
 - GT 6
 - GT 7
 
-## 20. Redmi
+## 21. REDMAGIC
+
+### REDMAGIC
+
+- REDMAGIC 5G
+- REDMAGIC 6
+- REDMAGIC 7
+- REDMAGIC 8 Pro
+- REDMAGIC 9 Pro
+- REDMAGIC 10 Pro
+
+## 22. Redmi
 
 ### Number
 
@@ -728,7 +750,7 @@
 - Redmi A3
 - Redmi A5
 
-## 21. Samsung
+## 23. Samsung
 
 ### Galaxy S
 
@@ -862,7 +884,7 @@
 - Galaxy M35
 - Galaxy M55
 
-## 22. Sony
+## 24. Sony
 
 ### Xperia
 
@@ -892,7 +914,7 @@
 - Xperia 10 V
 - Xperia 10 VI
 
-## 23. TECNO
+## 25. TECNO
 
 ### CAMON
 
@@ -937,7 +959,7 @@
 - PHANTOM V Fold
 - PHANTOM V Flip
 
-## 24. vivo
+## 26. vivo
 
 ### V
 
@@ -1009,7 +1031,7 @@
 - Y200
 - Y500
 
-## 25. Xiaomi
+## 27. Xiaomi
 
 ### Mi
 
@@ -1058,7 +1080,7 @@
 - Xiaomi MIX Fold 3
 - Xiaomi MIX Fold 4
 
-## 26. ZTE / nubia
+## 28. ZTE
 
 ### ZTE Blade
 
@@ -1070,23 +1092,6 @@
 - ZTE Blade V40
 - ZTE Blade V50
 
-### nubia
-
-- nubia Z50
-- nubia Z60 Ultra
-- nubia Z70 Ultra
-- nubia Flip 5G
-- nubia Neo 2 5G
-- nubia Neo 3 5G
-
-### REDMAGIC
-
-- REDMAGIC 5G
-- REDMAGIC 6
-- REDMAGIC 7
-- REDMAGIC 8 Pro
-- REDMAGIC 9 Pro
-- REDMAGIC 10 Pro
 
 ## Catatan integrasi aplikasi
 
